@@ -1,5 +1,7 @@
+import EventEmitter from 'events';
 import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
 import {
+  ClientRenderMessage,
   EventMessage,
   EventMessageType,
   NextVariantsMessage,
@@ -10,6 +12,8 @@ import { TextWord } from './text-word';
 import { Application, Text } from 'pixi.js';
 
 export class TextProcessor {
+  public clientRenderEvents = new EventEmitter();
+
   private _textSocket!: TextSocket;
 
   private _currentWord: TextWord = new TextWord('', this.createTextG(''));
@@ -25,14 +29,24 @@ export class TextProcessor {
     this._textSocket = new TextSocket('localhost:5149/ws');
 
     this._textSocket.messageRecievedEvent.on('event', (e: EventMessage) => {
+      if (e.type === EventMessageType.ClientRender) {
+        this.clientRenderEvents.emit('render', (e as ClientRenderMessage).arguments);
+
+        this._textSocket.sendMessage({
+          type: EventMessageType.SelectVariant          
+        });
+      }
+
       if (e.type === EventMessageType.NextVariants) {
         const eventNewVariants = e as NextVariantsMessage;
 
         this._nextTextVariants = eventNewVariants.variantsCodes.map(
           (code) => new TextWord(code, this.createTextG(code))
-        );
+        );        
 
-        this.toggleContextMenu(this._currentWord);
+        //TODO !!
+        if (!this._nextTextVariants[0].text.endsWith(".@Text"))
+          this.toggleContextMenu(this._currentWord);
       }
     });
   }
@@ -100,15 +114,24 @@ export class TextProcessor {
         );
         break;
       case 'Enter':
-        this._currentWord.fromWord(
-          this._flosatTextBoxGComponent!.selectedWord.textWord
-        );
-        this._updateText();
+        //TODO !!
+        if (!this._nextTextVariants[0].text?.endsWith(".@Text")) {
+          this._currentWord.fromWord(
+            this._flosatTextBoxGComponent!.selectedWord.textWord
+          );
+          this._updateText();
 
-        this._textSocket.sendMessage({
-          type: EventMessageType.SelectVariant,
-          selectedVariant: this._currentWord.text,
-        });
+          this._textSocket.sendMessage({
+            type: EventMessageType.SelectVariant,
+            selectedVariantCode: this._currentWord.text,
+          });
+        } else {
+          this._textSocket.sendMessage({
+            type: EventMessageType.SelectVariant,
+            selectedVariantCode: this._nextTextVariants[0].text,
+            selectedVariantValue: this._currentWord.text
+          });
+        }
 
         this._textWords.push(new TextWord(' ', this.createTextG(' ')));
 

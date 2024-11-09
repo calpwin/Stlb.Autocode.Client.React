@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import EventEmitter from 'events';
 
 export class TextSocket {
   messageRecievedEvent = new EventEmitter();
@@ -23,18 +23,23 @@ export class TextSocket {
     var msgJson = JSON.stringify(event);
 
     console.log(msgJson);
-    
+
     this._socket.send(msgJson);
   }
 }
 
 export enum EventMessageType {
+  ClientRender,
   NextVariants,
-  SelectVariant
+  SelectVariant,
 }
 
 export class EventMessage {
   public type!: EventMessageType;
+}
+
+export class ClientRenderMessage extends EventMessage {
+  public arguments: string[] = [];
 }
 
 export class NextVariantsMessage extends EventMessage {
@@ -42,5 +47,7 @@ export class NextVariantsMessage extends EventMessage {
 }
 
 export class SelectVariantMessage extends EventMessage {
-  public selectedVariant!: string;
+  public selectedVariantCode?: string;
+
+  public selectedVariantValue?: string;
 }
