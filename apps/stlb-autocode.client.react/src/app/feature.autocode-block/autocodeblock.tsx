@@ -10,7 +10,7 @@ export class AutocodeBlock extends Component<{ text: string }> {
   render() {
     return (
       <div id="text-editor-wrapper" style={{ width: '100%', height: '50%' }}>
-        {this.props.text}
+        {this.props.text} DELETE IT!!
       </div>
     );
   }
