@@ -7,7 +7,7 @@ import {
   NextVariantsMessage,
   SelectVariantMessage,
   TextSocket,
-} from './text-socket';
+} from '@stlb-autocode/logic-editor';
 import { TextWord } from './text-word';
 import { Application, Text } from 'pixi.js';
 

@@ -3,12 +3,13 @@ import { Component, KeyboardEvent } from 'react';
 /** .js file **/
 import styles from './app.module.less';
 
+import {LogicEditor} from '@stlb-autocode/logic-editor';
+
 import { Application, Sprite, Assets, Text } from 'pixi.js';
 import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
 import { TextWord } from './text-word';
 import { TextProcessor } from './text-processor';
 import { AutocodeBlock } from './feature.autocode-block/autocodeblock';
-import { ClientRenderMessage } from './text-socket';
 import { ClientComponent, ComponentArgument } from './feature.autocode-block/component-argument';
 
 class App extends Component {
@@ -17,6 +18,7 @@ class App extends Component {
   state = { text: '' };
 
   private _textProcessor!: TextProcessor;
+  private _logicEditor!: LogicEditor;
 
   private _currentWord: TextWord = new TextWord('');
   private _textWords: TextWord[] = [this._currentWord];
@@ -38,18 +40,21 @@ class App extends Component {
   componentDidMount() {
     if (this._isComponentMounted) return;
 
-    this._textProcessor = new TextProcessor(this._app);
+    // this._textProcessor = new TextProcessor(this._app);
 
-    this._textProcessor.clientRenderEvents.on(
-      'render',
-      (args: string[]) => {
-        console.log(args);
+    this._logicEditor = new LogicEditor(this._app);
+    this._logicEditor.renderDataBlock();
 
-        var arg = JSON.parse(args[0]) as ClientComponent;
+    // this._textProcessor.clientRenderEvents.on(
+    //   'render',
+    //   (args: string[]) => {
+    //     console.log(args);
 
-        this.setState({ text: arg.arguments.at(0)?.value });
-      }
-    );
+    //     var arg = JSON.parse(args[0]) as ClientComponent;
+
+    //     this.setState({ text: arg.arguments.at(0)?.value });
+    //   }
+    // );
 
     initPixiJs(this._app);
 
