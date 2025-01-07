@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@stlb-autocode/logic-editor": ["packages/logic-editor/src/index.ts"]
+      "@stlb-autocode/logic-editor": ["packages/logic-editor/src/index.ts"],
+      "@stlb-autocode/stlb-base": ["packages/stlb-base/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

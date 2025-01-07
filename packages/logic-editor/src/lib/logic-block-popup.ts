@@ -1,10 +1,10 @@
 import { Application, Container, Graphics, Text } from 'pixi.js';
+import { StlbGlobals } from '@stlb-autocode/stlb-base';
 
 export class LogicBlockPopUp {
   constructor(
     private readonly _pointerCoordinates: { x: number; y: number },
-    private readonly _logicBlockCodes: string[],
-    private readonly _app: Application
+    private readonly _logicBlockCodes: string[]
   ) {}
 
   render() {
@@ -21,26 +21,27 @@ export class LogicBlockPopUp {
     this._logicBlockCodes.forEach((code) => {
       const logicBlockContainer = this._renderLogicBlock(code);
 
-      logicBlockContainer.y = logicBlockContainerY; 
-      logicBlockContainerY += logicBlockContainer.y + logicBlockContainer.height;
+      logicBlockContainer.y = logicBlockContainerY;
+      logicBlockContainerY +=
+        logicBlockContainer.y + logicBlockContainer.height;
 
-      container.addChild(logicBlockContainer)
+      container.addChild(logicBlockContainer);
     });
 
-    this._app.stage.addChild(container);
+    StlbGlobals.app.stage.addChild(container);
   }
 
   private _renderLogicBlock(blockCode: string) {
-    const container = new Container();    
-    
-    const graphics = new Graphics().rect(0,0,200,30);
+    const container = new Container();
+
+    const graphics = new Graphics().rect(0, 0, 200, 30);
     graphics.fill('white');
-    // graphics.stroke({width: 1, color: 'red'});    
+    // graphics.stroke({width: 1, color: 'red'});
 
     const text = new Text({ text: blockCode });
     text.x = 5;
     text.style.fontSize = 14;
-    text.y = graphics.height/2 - text.height/2;    
+    text.y = graphics.height / 2 - text.height / 2;
     text.style.fill = 'black';
 
     graphics.addChild(text);

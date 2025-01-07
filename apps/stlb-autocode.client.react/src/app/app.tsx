@@ -4,6 +4,7 @@ import { Component, KeyboardEvent } from 'react';
 import styles from './app.module.less';
 
 import {LogicEditor} from '@stlb-autocode/logic-editor';
+import {StlbGlobals, StlbStore} from '@stlb-autocode/stlb-base';
 
 import { Application, Sprite, Assets, Text } from 'pixi.js';
 import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
@@ -11,6 +12,9 @@ import { TextWord } from './text-word';
 import { TextProcessor } from './text-processor';
 import { AutocodeBlock } from './feature.autocode-block/autocodeblock';
 import { ClientComponent, ComponentArgument } from './feature.autocode-block/component-argument';
+import { GComponentEditor } from './gcomponent-editor/gcomponent-editor';
+import { GComponentPropertyEditor } from './gcomponent-editor/gcomponent-property-editor';
+import { increment } from 'packages/stlb-base/src/redux/stlb-store-slice';
 
 class App extends Component {
   _isComponentMounted = false;
@@ -31,7 +35,7 @@ class App extends Component {
     return (
       <div id="app-wrapper" style={{ width: '100%', height: '100%' }}>
         <div id="text-editor-wrapper" style={{ width: '100%', height: '100%' }}>
-          <AutocodeBlock text={this.state.text} />
+          {/* <AutocodeBlock text={this.state.text} /> */}
         </div>
       </div>
     );
@@ -40,10 +44,22 @@ class App extends Component {
   componentDidMount() {
     if (this._isComponentMounted) return;
 
+    StlbGlobals.app = this._app;
+
+    initPixiJs(this._app).then(() => {
+      const gCompEditorG = new GComponentEditor().renderTo(this._app.stage);    
+      const gCompPropertyEditorG = new GComponentPropertyEditor().renderTo(this._app.stage);    
+  
+      this._logicEditor = new LogicEditor(this._app);
+      const gLogicEditorG = this._logicEditor.render();
+      this._app.stage.addChild(gLogicEditorG);
+
+      StlbStore.default.dispatch(increment());
+    });
+
     // this._textProcessor = new TextProcessor(this._app);
 
-    this._logicEditor = new LogicEditor(this._app);
-    this._logicEditor.renderDataBlock();
+    
 
     // this._textProcessor.clientRenderEvents.on(
     //   'render',
@@ -56,7 +72,7 @@ class App extends Component {
     //   }
     // );
 
-    initPixiJs(this._app);
+    
 
     this._isComponentMounted = true;
   }
@@ -71,10 +87,11 @@ async function initPixiJs(app: Application) {
   // Wait for the Renderer to be available
   await app.init({
     width: Math.max(1, document.body.clientWidth - 4),
-    height: Math.max(1, document.body.clientHeight - 4) / 2,
+    height: Math.max(1, document.body.clientHeight - 4),
     resolution: devicePixelRatio,
     autoDensity: true,
-  });
+    backgroundColor: 'white'
+  });  
 
   // The application will create a canvas element for you that you
   // can then insert into the DOM

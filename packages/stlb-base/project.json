@@ -1,0 +1,9 @@
+{
+  "name": "stlb-base",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/stlb-base/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project stlb-base --web",
+  "targets": {}
+}

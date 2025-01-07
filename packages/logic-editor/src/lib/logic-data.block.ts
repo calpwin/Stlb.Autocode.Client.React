@@ -6,8 +6,7 @@ import { Stlbinput } from './stlb-input';
 
 export class LogicDataBlock {
   constructor(
-    public readonly props: string[],
-    private readonly _app: Application,
+    public readonly props: string[],    
     private readonly _textSocket: TextSocket
   ) {}
 
@@ -24,7 +23,7 @@ export class LogicDataBlock {
       this._renderNextBtn();
     }
 
-    this._app.stage.addChild(this._container);
+    return this._container;
   }
 
   private _renderProperty(name: string, index: number) {
@@ -59,8 +58,7 @@ export class LogicDataBlock {
 
           const popup = new LogicBlockPopUp(
             { x: e.globalX + 10, y: e.globalY},
-            json.map((x) => x.code),
-            this._app
+            json.map((x) => x.code)            
           );
 
           popup.render();
