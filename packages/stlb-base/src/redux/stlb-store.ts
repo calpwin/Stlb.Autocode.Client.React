@@ -3,6 +3,6 @@ import counterReducer from './stlb-store-slice';
 
 export default configureStore({
   reducer: {
-    counter: counterReducer,
+    stlbbase: counterReducer,
   },
 });

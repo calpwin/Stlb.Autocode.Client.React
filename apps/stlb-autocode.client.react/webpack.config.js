@@ -2,6 +2,14 @@ const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
 const { NxReactWebpackPlugin } = require('@nx/react/webpack-plugin');
 const { join } = require('path');
 
+class FilterSourceMapsWarnings {
+  apply(compiler) {
+    compiler.options.ignoreWarnings.push(
+      (x) => /Failed to parse source/.test(x)
+    );
+  }
+}
+
 module.exports = {
   output: {
     path: join(__dirname, '../../dist/apps/stlb-autocode.client.react'),
@@ -26,5 +34,6 @@ module.exports = {
       // See: https://react-svgr.com/
       // svgr: false
     }),
+    new FilterSourceMapsWarnings({})
   ],
 };

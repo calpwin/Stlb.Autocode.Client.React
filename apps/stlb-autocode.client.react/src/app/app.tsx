@@ -14,7 +14,6 @@ import { AutocodeBlock } from './feature.autocode-block/autocodeblock';
 import { ClientComponent, ComponentArgument } from './feature.autocode-block/component-argument';
 import { GComponentEditor } from './gcomponent-editor/gcomponent-editor';
 import { GComponentPropertyEditor } from './gcomponent-editor/gcomponent-property-editor';
-import { increment } from 'packages/stlb-base/src/redux/stlb-store-slice';
 
 class App extends Component {
   _isComponentMounted = false;
@@ -52,9 +51,7 @@ class App extends Component {
   
       this._logicEditor = new LogicEditor(this._app);
       const gLogicEditorG = this._logicEditor.render();
-      this._app.stage.addChild(gLogicEditorG);
-
-      StlbStore.default.dispatch(increment());
+      this._app.stage.addChild(gLogicEditorG);      
     });
 
     // this._textProcessor = new TextProcessor(this._app);

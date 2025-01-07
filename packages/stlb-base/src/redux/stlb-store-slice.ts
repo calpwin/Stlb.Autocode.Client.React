@@ -1,29 +1,40 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+export class SComponent {
+  constructor(public id: string) {}
+}
+
+export interface StlbBaseState {
+  components: { [compId: string]: SComponent };
+  selectedComponentId?: string;
+}
 
 export const counterSlice = createSlice({
-    name: 'counter',
-    initialState: {
-      value: 0,
+  name: 'stlbbase',
+  initialState: {
+    components: {},
+    selectedComponentId: undefined,
+  } as StlbBaseState,
+  reducers: {
+    addComponent: (state, action: PayloadAction<SComponent>) => {
+      state.components[action.payload.id] = action.payload;
     },
-    reducers: {
-      increment: (state) => {
-        // Redux Toolkit allows us to write "mutating" logic in reducers. It
-        // doesn't actually mutate the state because it uses the Immer library,
-        // which detects changes to a "draft state" and produces a brand new
-        // immutable state based off those changes.
-        // Also, no return statement is required from these functions.
-        state.value += 1
-      },
-      decrement: (state) => {
-        state.value -= 1
-      },
-      incrementByAmount: (state, action) => {
-        state.value += action.payload
-      },
+    // decrement: (state) => {
+    //   state.value -= 1;
+    // },
+    // incrementByAmount: (state, action) => {
+    //   state.value += action.payload;
+    // },
+    selectComponent: (state, action: PayloadAction<{compId: string}>) => {
+      state.selectedComponentId = action.payload.compId;
     },
-  })
-  
-  // Action creators are generated for each case reducer function
-  export const { increment, decrement, incrementByAmount } = counterSlice.actions
-  
-  export default counterSlice.reducer
+    unselectComponent: (state) => {
+      state.selectedComponentId = undefined;
+    },
+  },
+});
+
+// Action creators are generated for each case reducer function
+export const { addComponent, selectComponent, unselectComponent } = counterSlice.actions;
+
+export default counterSlice.reducer;

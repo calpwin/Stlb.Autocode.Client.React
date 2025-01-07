@@ -1,20 +1,20 @@
-import { Container, Text } from 'pixi.js';
-import { StlbBaseGcomponent } from '../../../../../packages/stlb-base/src/gcomponent/stlb-base-gcomponent';
+import { Container, ContainerChild, Text } from 'pixi.js';
+import { StlbBaseGcomponent } from '@stlb-autocode/stlb-base';
 
-export class StlbTextGComponent extends StlbBaseGcomponent {
+export class StlbTextGComponent extends StlbBaseGcomponent {  
   settings: { [name: string]: string } = { name: 'Andrei' };
 
-  renderTo(parent: Container) {
-    const container = new Container();
-    container.position.x = 50;
-    container.position.y = 50;
+  renderTo(parent: Container) {    
+    this._container.position.x = 50;
+    this._container.position.y = 50;
 
     const text = new Text();
     text.text = `Yeeh hello ${this.settings.name}!`;
 
-    container.addChild(text);
-    parent.addChild(container);
+    this._container.addChild(text);
 
-    return container;
+    parent.addChild(this._container);
+
+    return this._container;
   }
 }

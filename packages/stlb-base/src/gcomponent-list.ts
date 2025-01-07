@@ -1,14 +1,17 @@
+import { injectable } from 'inversify';
 import { StlbBaseGcomponent } from './gcomponent/stlb-base-gcomponent';
 
+@injectable()
 export class GComponentList {
-  private readonly _components: StlbBaseGcomponent[] = [];
+  private readonly _components: { [compId: string]: StlbBaseGcomponent } = {};
 
-  public get components() {
-    return [...this._components];
+  addComponent(comp: StlbBaseGcomponent) {
+    this._components[comp.id] = comp;
   }
 
-  addComponent(comp: StlbBaseGcomponent) {    
+  getComponentById(id: string): StlbBaseGcomponent | undefined {
+    if (id in this._components === false) return undefined;
 
-    this._components.push(comp);    
+    return this._components[id];
   }
 }
