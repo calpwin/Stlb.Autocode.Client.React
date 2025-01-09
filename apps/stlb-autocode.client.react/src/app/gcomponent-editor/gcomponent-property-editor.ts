@@ -4,9 +4,10 @@ import watch from 'redux-watch';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
 import { GComponentList } from 'packages/stlb-base/src/gcomponent-list';
 import { StlbIocTypes } from 'packages/stlb-base/src/IoC/ioc-types';
+import { Stlbinput } from 'packages/stlb-base/src/gcomponent/stlb-input';
 
 export class GComponentPropertyEditor {
-  private _text = new Text({ style: { fontSize: 12, fill: 'black' } });
+  private _propInput = new Stlbinput();
 
   renderTo(parent: Container) {
     var container = new Container();
@@ -14,9 +15,14 @@ export class GComponentPropertyEditor {
     container.height = (StlbGlobals.app.renderer.height / 3) * 2;
     container.position.x = StlbGlobals.app.renderer.width - 300;
     container.position.y = 0;
-    
-    this._text.text = "Waitig ...";
-    container.addChild(this._text);
+
+    this._propInput.inputText = 'Waitig ...';
+    this._propInput.onChanged.subscribe({
+      next: (value) => {
+        console.log(value + ' Yeeh!!');
+      },
+    });
+    container.addChild(this._propInput.render());
 
     var lineG = new Graphics()
       .moveTo(0, 0)
@@ -31,9 +37,11 @@ export class GComponentPropertyEditor {
       w((newVal?: string, oldVal?: string) => {
         if (!newVal) return;
 
-        const compList = StlbIoc.get<GComponentList>(StlbIocTypes.GComponentList);
+        const compList = StlbIoc.get<GComponentList>(
+          StlbIocTypes.GComponentList
+        );
         const comp = <StlbTextGComponent>compList.getComponentById(newVal);
-        this._text.text = comp.settings['name'];
+        this._propInput.inputText = comp.settings['name'];
       })
     );
 

@@ -2,7 +2,7 @@ import { Application, Container, Graphics, Text } from 'pixi.js';
 import { TextSocket } from './text-socket';
 import { LogicBlock } from './logic.block';
 import { LogicBlockPopUp } from './logic-block-popup';
-import { Stlbinput } from './stlb-input';
+import { Stlbinput } from '../../../stlb-base/src/gcomponent/stlb-input';
 
 export class LogicDataBlock {
   constructor(

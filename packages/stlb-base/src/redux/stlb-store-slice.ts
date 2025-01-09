@@ -18,13 +18,7 @@ export const counterSlice = createSlice({
   reducers: {
     addComponent: (state, action: PayloadAction<SComponent>) => {
       state.components[action.payload.id] = action.payload;
-    },
-    // decrement: (state) => {
-    //   state.value -= 1;
-    // },
-    // incrementByAmount: (state, action) => {
-    //   state.value += action.payload;
-    // },
+    },    
     selectComponent: (state, action: PayloadAction<{compId: string}>) => {
       state.selectedComponentId = action.payload.compId;
     },
