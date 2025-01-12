@@ -17,15 +17,20 @@ export class StlbRectangleGComponent extends StlbBaseGcomponent {
     this._container.position.x = 100;
     this._container.position.y = 100;
 
+    this.redraw();
+
+    parent.addChild(this._container);
+
+    return this._container;
+  }
+
+  redraw(): void {
+    super.redraw();
+
     this._rectangleG.fill('red');
     this._rectangleG.width = this.getProperty<number>('width').value;
     this._rectangleG.height = this.getProperty<number>('height').value;
 
-    this._container.addChild(this._rectangleG);   
-    parent.addChild(this._container);
-
-    
-
-    return this._container;
+    this._container.addChild(this._rectangleG);
   }
 }

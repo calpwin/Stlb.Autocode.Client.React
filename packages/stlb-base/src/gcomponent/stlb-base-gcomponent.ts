@@ -41,8 +41,13 @@ export abstract class StlbBaseGcomponent {
 
     if (property.name === 'x') {
       this._container.position.x = (<SComponentProperty<number>>property).value;
+
+      this.redraw();
     } else if (property.name === 'width') {
       this._container.width = (<SComponentProperty<number>>property).value;
+
+      // Only if both width and height exists
+      if (this._properties['heiight']) this.redraw();
     }
 
     StlbStore.default.dispatch(
@@ -56,7 +61,12 @@ export abstract class StlbBaseGcomponent {
     return <SComponentProperty<T>>this._properties[name];
   }
 
-  renderTo(parent: Container) {
+  renderTo(parent: Container) {    
+  }
+
+  redraw() {
+    this._container.removeChildren();
+
     const resizerG = this._resizers[StlcResizerSide.Left].render();
     this._container.addChild(resizerG);
   }

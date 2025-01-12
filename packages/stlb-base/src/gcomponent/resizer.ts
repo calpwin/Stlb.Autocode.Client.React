@@ -34,7 +34,7 @@ export class StlbResizer {
   render() {
     this._resizerG.position.x = 0;
     this._resizerG.position.y =
-      this._parentGComp.getProperty<number>('height').value / 2;
+      this._parentGComp.getProperty<number>('height')?.value / 2;
     this._resizerG.zIndex = 1000;
 
     return this._resizerG;
@@ -49,8 +49,8 @@ export class StlbResizer {
       this._isActive = true;
       this._startXPosition = e.client.x;
       this._startYPosition = e.client.y;
-      this._startWidth = this._parentGComp.getProperty<number>('width').value;
-      this._startHeight = this._parentGComp.getProperty<number>('height').value;
+      this._startWidth = this._parentGComp.getProperty<number>('width')?.value;
+      this._startHeight = this._parentGComp.getProperty<number>('height')?.value;
 
       StlbGlobals.app.stage.on('mousemove', this._onMouseMove);
     });
