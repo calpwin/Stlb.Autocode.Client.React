@@ -1,4 +1,4 @@
-import { GComponentList } from "../gcomponent-list";
+import { GComponentList } from "../gcomponent/gcomponent-list";
 
 const StlbIocTypes = {
     GComponentList: GComponentList

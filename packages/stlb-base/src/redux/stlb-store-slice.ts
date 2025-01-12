@@ -1,8 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { act } from 'react';
+
+export class SComponentProperty<T = string | number> {
+  constructor(public readonly name: string, public value: T) {}
+}
 
 export class SComponent {
-  constructor(public id: string) {}
+  constructor(
+    public readonly id: string,
+    public readonly properties: { [name: string]: SComponentProperty }
+  ) {}
 }
+
+// export class StlbExtensions {
+//   static sComponentDeepCopy(comp: SComponent) {
+//     return new SComponent('dsds', {});
+//     const properties: { [name: string]: SComponentProperty } = {};
+
+//     Object.keys(comp.properties).forEach((key) => {
+//       properties[key] = { ...comp.properties[key] };
+//     });
+//     return new SComponent(comp.id, properties);
+//   }
+// }
 
 export interface StlbBaseState {
   components: { [compId: string]: SComponent };
@@ -18,8 +38,18 @@ export const counterSlice = createSlice({
   reducers: {
     addComponent: (state, action: PayloadAction<SComponent>) => {
       state.components[action.payload.id] = action.payload;
-    },    
-    selectComponent: (state, action: PayloadAction<{compId: string}>) => {
+    },
+    setComponentSettings: (
+      state,
+      action: PayloadAction<{ compId: string; property: SComponentProperty }>
+    ) => {
+      const comp = state.components[action.payload.compId];
+      comp.properties[action.payload.property.name] = {
+        ...action.payload.property,
+      };
+    },
+
+    selectComponent: (state, action: PayloadAction<{ compId: string }>) => {
       state.selectedComponentId = action.payload.compId;
     },
     unselectComponent: (state) => {
@@ -29,6 +59,11 @@ export const counterSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { addComponent, selectComponent, unselectComponent } = counterSlice.actions;
+export const {
+  addComponent,
+  selectComponent,
+  unselectComponent,
+  setComponentSettings,
+} = counterSlice.actions;
 
 export default counterSlice.reducer;

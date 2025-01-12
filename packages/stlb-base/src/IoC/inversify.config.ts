@@ -1,5 +1,5 @@
 import { Container } from 'inversify';
-import { GComponentList } from '../gcomponent-list';
+import { GComponentList } from '../gcomponent/gcomponent-list';
 import { StlbIocTypes } from './ioc-types';
 
 const StlbIoc = new Container();

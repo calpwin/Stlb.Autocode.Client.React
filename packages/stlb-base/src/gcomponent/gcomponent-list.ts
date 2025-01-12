@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { StlbBaseGcomponent } from './gcomponent/stlb-base-gcomponent';
+import { StlbBaseGcomponent } from './stlb-base-gcomponent';
 
 @injectable()
 export class GComponentList {
