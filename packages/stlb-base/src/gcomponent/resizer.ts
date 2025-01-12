@@ -9,10 +9,10 @@ import { StlbGlobals } from '../globals';
 import { debounce } from 'ts-debounce';
 
 export enum StlcResizerSide {
-  Left = 1,
-  Top = 2,
-  Right = 3,
-  Bottom = 4,
+  Left,
+  Top,
+  Right,
+  Bottom,
 }
 
 export class StlbResizer {
@@ -32,10 +32,50 @@ export class StlbResizer {
   }
 
   render() {
+    this._resizerG.zIndex = 1000;
+
+    if (this.side === StlcResizerSide.Left)
+      this._resizerG = this._renderLeftResizer();
+    else if (this.side === StlcResizerSide.Top)
+      this._resizerG = this._renderTopResizer();
+    else if (this.side === StlcResizerSide.Right)
+      this._resizerG = this._renderRightResizer();
+    else if (this.side === StlcResizerSide.Bottom)
+      this._resizerG = this._renderBottomResizer();
+
+    return this._resizerG;
+  }
+
+  _renderLeftResizer() {
     this._resizerG.position.x = 0;
     this._resizerG.position.y =
-      this._parentGComp.getProperty<number>('height')?.value / 2;
-    this._resizerG.zIndex = 1000;
+      this._parentGComp.getProperty<number>('height').value / 2;
+
+    return this._resizerG;
+  }
+
+  _renderTopResizer() {
+    this._resizerG.position.x =
+      this._parentGComp.getProperty<number>('width').value / 2;
+    this._resizerG.position.y = 0;
+
+    return this._resizerG;
+  }
+
+  _renderRightResizer() {
+    this._resizerG.position.x =
+      this._parentGComp.getProperty<number>('width').value;
+    this._resizerG.position.y =
+      this._parentGComp.getProperty<number>('height').value / 2;
+
+    return this._resizerG;
+  }
+
+  _renderBottomResizer() {
+    this._resizerG.position.x =
+      this._parentGComp.getProperty<number>('width').value / 2;
+    this._resizerG.position.y =
+      this._parentGComp.getProperty<number>('height').value;
 
     return this._resizerG;
   }
@@ -49,8 +89,8 @@ export class StlbResizer {
       this._isActive = true;
       this._startXPosition = e.client.x;
       this._startYPosition = e.client.y;
-      this._startWidth = this._parentGComp.getProperty<number>('width')?.value;
-      this._startHeight = this._parentGComp.getProperty<number>('height')?.value;
+      this._startWidth = this._parentGComp.getProperty<number>('width').value;
+      this._startHeight = this._parentGComp.getProperty<number>('height').value;
 
       StlbGlobals.app.stage.on('mousemove', this._onMouseMove);
     });
@@ -71,6 +111,23 @@ export class StlbResizer {
       this._parentGComp.setProperty({
         name: 'width',
         value: this._startWidth! + (this._startXPosition! - e.client.x),
+      });
+    } else if (this.side === StlcResizerSide.Top) {
+      this._parentGComp.setProperty({ name: 'y', value: e.client.y });
+      this._parentGComp.setProperty({
+        name: 'height',
+        value: this._startHeight! + (this._startYPosition! - e.client.y),
+      });
+    } else if (this.side === StlcResizerSide.Right) {
+      // this._parentGComp.setProperty({ name: 'x', value: e.client.x });
+      this._parentGComp.setProperty({
+        name: 'width',
+        value: this._startWidth! + (e.client.x - this._startXPosition!),
+      });
+    } else if (this.side === StlcResizerSide.Bottom) {      
+      this._parentGComp.setProperty({
+        name: 'height',
+        value: this._startHeight! + (e.client.y - this._startYPosition!),
       });
     }
   }

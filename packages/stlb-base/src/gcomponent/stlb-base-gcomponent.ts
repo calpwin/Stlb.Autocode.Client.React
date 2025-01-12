@@ -17,8 +17,11 @@ export abstract class StlbBaseGcomponent {
   private readonly _properties: { [name: string]: SComponentProperty } = {};
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
 
-  private readonly _resizers = {
+  private readonly _resizers: { [key in StlcResizerSide]: StlbResizer } = {
     [StlcResizerSide.Left]: new StlbResizer(StlcResizerSide.Left, this),
+    [StlcResizerSide.Top]: new StlbResizer(StlcResizerSide.Top, this),
+    [StlcResizerSide.Right]: new StlbResizer(StlcResizerSide.Right, this),
+    [StlcResizerSide.Bottom]: new StlbResizer(StlcResizerSide.Bottom, this),
   };
 
   constructor() {
@@ -43,11 +46,20 @@ export abstract class StlbBaseGcomponent {
       this._container.position.x = (<SComponentProperty<number>>property).value;
 
       this.redraw();
+    } else if (property.name === 'y') {
+      this._container.position.y = (<SComponentProperty<number>>property).value;
+
+      this.redraw();
     } else if (property.name === 'width') {
       this._container.width = (<SComponentProperty<number>>property).value;
 
       // Only if both width and height exists
-      if (this._properties['heiight']) this.redraw();
+      if (this._properties['height']) this.redraw();
+    } else if (property.name === 'height') {
+      this._container.height = (<SComponentProperty<number>>property).value;
+
+      // Only if both width and height exists
+      if (this._properties['width']) this.redraw();
     }
 
     StlbStore.default.dispatch(
@@ -61,13 +73,18 @@ export abstract class StlbBaseGcomponent {
     return <SComponentProperty<T>>this._properties[name];
   }
 
-  renderTo(parent: Container) {    
-  }
+  renderTo(parent: Container) {}
 
   redraw() {
     this._container.removeChildren();
 
-    const resizerG = this._resizers[StlcResizerSide.Left].render();
-    this._container.addChild(resizerG);
+    for (const key in StlcResizerSide) {
+      Object.keys(StlcResizerSide).forEach((key) => {
+        if (+key >= 0) {
+          const resizerG = this._resizers[+key as 0 | 1 | 2 | 3].render();
+          this._container.addChild(resizerG);
+        }
+      });
+    }
   }
 }
