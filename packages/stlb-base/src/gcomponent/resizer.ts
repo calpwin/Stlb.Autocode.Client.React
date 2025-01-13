@@ -19,6 +19,8 @@ export class StlbResizer {
   private _resizerG = new Graphics().circle(0, 0, 7).fill('green');
 
   private _isActive = false;
+  private _startPointerXPosition?: number;
+  private _startPointerYPosition?: number;
   private _startXPosition?: number;
   private _startYPosition?: number;
   private _startWidth?: number;
@@ -83,14 +85,24 @@ export class StlbResizer {
   private _bindEvents() {
     this._resizerG.eventMode = 'static';
     StlbGlobals.app.stage.eventMode = 'static';
-    this._resizerG.hitArea = new Circle(0, 0, 20);
+    this._resizerG.hitArea = new Circle(0, 0, 10);
 
     this._resizerG.on('mousedown', (e) => {
       this._isActive = true;
-      this._startXPosition = e.client.x;
-      this._startYPosition = e.client.y;
+      this._startPointerXPosition = e.client.x;
+      this._startPointerYPosition = e.client.y;
+
+      this._startXPosition = this._parentGComp.getProperty<number>('x').value;
+      this._startYPosition = this._parentGComp.getProperty<number>('y').value;
       this._startWidth = this._parentGComp.getProperty<number>('width').value;
       this._startHeight = this._parentGComp.getProperty<number>('height').value;
+
+      const getRandomIntegerInclusive = (min: number, max: number) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      };      
 
       StlbGlobals.app.stage.on('mousemove', this._onMouseMove);
     });
@@ -106,28 +118,33 @@ export class StlbResizer {
   };
 
   private _move(e: FederatedPointerEvent) {
+    const xDelta = this._startPointerXPosition! - e.client.x;
+
     if (this.side === StlcResizerSide.Left) {
-      this._parentGComp.setProperty({ name: 'x', value: e.client.x });
+      this._parentGComp.setProperty({
+        name: 'x',
+        value: this._startXPosition! - xDelta,
+      });
       this._parentGComp.setProperty({
         name: 'width',
-        value: this._startWidth! + (this._startXPosition! - e.client.x),
+        value: this._startWidth! + xDelta,
       });
     } else if (this.side === StlcResizerSide.Top) {
       this._parentGComp.setProperty({ name: 'y', value: e.client.y });
       this._parentGComp.setProperty({
         name: 'height',
-        value: this._startHeight! + (this._startYPosition! - e.client.y),
+        value: this._startHeight! + (this._startPointerYPosition! - e.client.y),
       });
     } else if (this.side === StlcResizerSide.Right) {
       // this._parentGComp.setProperty({ name: 'x', value: e.client.x });
       this._parentGComp.setProperty({
         name: 'width',
-        value: this._startWidth! + (e.client.x - this._startXPosition!),
+        value: this._startWidth! + (e.client.x - this._startPointerXPosition!),
       });
-    } else if (this.side === StlcResizerSide.Bottom) {      
+    } else if (this.side === StlcResizerSide.Bottom) {
       this._parentGComp.setProperty({
         name: 'height',
-        value: this._startHeight! + (e.client.y - this._startYPosition!),
+        value: this._startHeight! + (e.client.y - this._startPointerYPosition!),
       });
     }
   }

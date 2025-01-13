@@ -12,7 +12,8 @@ import { StlbResizer, StlcResizerSide } from './resizer';
 
 export abstract class StlbBaseGcomponent {
   readonly id = Guid.create().toString();
-  protected readonly _container: Container = new Container();
+  public readonly _container: Container = new Container();
+  public readonly graphics: Graphics = new Graphics().rect(0,0,20,20).fill('white');
 
   private readonly _properties: { [name: string]: SComponentProperty } = {};
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
@@ -24,7 +25,9 @@ export abstract class StlbBaseGcomponent {
     [StlcResizerSide.Bottom]: new StlbResizer(StlcResizerSide.Bottom, this),
   };
 
-  constructor() {
+  constructor(public readonly parentCompId: string) {
+    this._container.addChild(this.graphics);
+
     StlbStore.default.dispatch(
       addComponent({ id: this.id, properties: { ...this._properties } })
     );
@@ -51,12 +54,14 @@ export abstract class StlbBaseGcomponent {
 
       this.redraw();
     } else if (property.name === 'width') {
-      this._container.width = (<SComponentProperty<number>>property).value;
+      // this._container.width = (<SComponentProperty<number>>property).value;
+      this.graphics.width = (<SComponentProperty<number>>property).value;
 
       // Only if both width and height exists
       if (this._properties['height']) this.redraw();
     } else if (property.name === 'height') {
-      this._container.height = (<SComponentProperty<number>>property).value;
+      // this._container.height = (<SComponentProperty<number>>property).value;
+      this.graphics.height = (<SComponentProperty<number>>property).value;
 
       // Only if both width and height exists
       if (this._properties['width']) this.redraw();
@@ -86,5 +91,9 @@ export abstract class StlbBaseGcomponent {
         }
       });
     }
+  }
+
+  addChild(gcomp: StlbBaseGcomponent) {
+    this._container.addChild(gcomp._container);
   }
 }

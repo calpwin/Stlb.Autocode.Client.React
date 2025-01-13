@@ -7,29 +7,36 @@ import { StlbIocTypes } from 'packages/stlb-base/src/IoC/ioc-types';
 import { StlbRectangleGComponent } from '../gcomponents/stlb-rectangle.gcomponent';
 
 export class GComponentEditor {
-  renderTo(parent: Container) {
-    var container = new Container();
-    container.width = StlbGlobals.app.renderer.width - 300;
-    container.height = (StlbGlobals.app.renderer.height / 3) * 2;
-    container.position.x = 0;
-    container.position.y = 0;
-    const containerG = new Graphics()
-      .rect(0, 0, StlbGlobals.app.renderer.width - 300, (StlbGlobals.app.renderer.height / 3) * 2)
-      .fill('white');
-    container.addChild(containerG);
-
-    // const textG = new StlbTextGComponent();
-    // textG.renderTo(container);
-    const rectG = new StlbRectangleGComponent();
-    rectG.renderTo(container);
+  render() {
+  //   var container = new Container();
+  //   container.width = StlbGlobals.app.renderer.width - 300;
+  //   container.height = (StlbGlobals.app.renderer.height / 3) * 2;
+  //   container.position.x = 0;
+  //   container.position.y = 0;
+  //   const containerG = new Graphics()
+  //     .rect(
+  //       0,
+  //       0,
+  //       StlbGlobals.app.renderer.width - 300,
+  //       (StlbGlobals.app.renderer.height / 3) * 2
+  //     )
+  //     .fill('white');
+  //   container.addChild(containerG);
 
     const gComponentList = StlbIoc.get<GComponentList>(
       StlbIocTypes.GComponentList
     );
+
+    // const textG = new StlbTextGComponent();
+    // textG.renderTo(container);
+
+    const rectG = new StlbRectangleGComponent(GComponentList.RootCompId);
     gComponentList.addComponent(rectG);
 
-    parent.addChild(container);
+    // gComponentList.addComponent(rectG);
 
-    return container;
+    // parent.addChild(container);
+
+    // return container;
   }
 }

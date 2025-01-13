@@ -2,8 +2,8 @@ import { Container, ContainerChild, Text, validFormats } from 'pixi.js';
 import { StlbBaseGcomponent } from '@stlb-autocode/stlb-base';
 
 export class StlbTextGComponent extends StlbBaseGcomponent {
-  constructor() {
-    super();
+  constructor(parentCompId: string) {
+    super(parentCompId);
 
     this.setProperty({ name: 'name', value: 'Andrei' });
     this.setProperty({ name: 'width', value: 200 });

@@ -46,7 +46,7 @@ class App extends Component {
     StlbGlobals.app = this._app;
 
     initPixiJs(this._app).then(() => {
-      const gCompEditorG = new GComponentEditor().renderTo(this._app.stage);    
+      const gCompEditorG = new GComponentEditor().render();    
       const gCompPropertyEditorG = new GComponentPropertyEditor().renderTo(this._app.stage);    
   
       this._logicEditor = new LogicEditor(this._app);
