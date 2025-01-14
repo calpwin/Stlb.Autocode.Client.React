@@ -1,14 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { act } from 'react';
 
 export class SComponentProperty<T = string | number> {
   constructor(public readonly name: string, public value: T) {}
 }
 
+export enum SComponentConstraintDirection {
+  Left,
+  Top,
+  Right,
+  Bottom,
+  CenterHorizontal,
+  CenterVertical,
+}
+
 export class SComponent {
   constructor(
     public readonly id: string,
-    public readonly properties: { [name: string]: SComponentProperty }
+    public readonly properties: { [name: string]: SComponentProperty }    
   ) {}
 }
 

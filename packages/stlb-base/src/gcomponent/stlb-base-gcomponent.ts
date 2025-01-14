@@ -1,16 +1,9 @@
-import {
-  Circle,
-  Color,
-  Container,
-  Graphics,
-  GraphicsPath,
-  loadKTX2onWorker,
-  Rectangle,
-  Text,
-} from 'pixi.js';
+import { Circle, Container, Graphics, Text } from 'pixi.js';
 import * as StlbStore from '../redux/stlb-store';
 import {
   addComponent,
+  SComponentConstraintDirection,
+  SComponentConstraintDirection as SComponentPositionConstraintDirection,
   SComponentProperty,
   selectComponent,
   setComponentSettings as setComponentProperty,
@@ -19,23 +12,24 @@ import { Guid } from 'guid-typescript';
 import { Subject } from 'rxjs';
 import { StlbResizer, StlcResizerSide } from './resizer';
 import { Stlbinput } from './stlb-input';
-import { GComponentList } from './gcomponent-list';
 import { StlbGlobals } from '../globals';
-import { current } from '@reduxjs/toolkit';
 
-export abstract class StlbBaseGcomponent {
+export abstract class StlbBaseGComponent {
   public readonly id!: string;
   public readonly _container: Container = new Container();
   public readonly propertyContainer: Container = new Container();
-  public readonly graphics: Graphics = new Graphics()
-    .rect(0, 0, 20, 20)
-    .fill('white');
+  public readonly graphics: Graphics = new Graphics().rect(0, 0, 20, 20).fill('white');
+
+  // Will set via GComponentList
+  protected _parentGComp!: StlbBaseGComponent;
+  protected readonly _childComps: StlbBaseGComponent[] = [];
 
   private readonly _properties: { [name: string]: SComponentProperty } = {
     ['x']: new SComponentProperty('x', 0),
     ['y']: new SComponentProperty('y', 0),
     ['width']: new SComponentProperty('width', 0),
     ['height']: new SComponentProperty('height', 0),
+    ['positionConstraints']: new SComponentProperty('positionConstraints', JSON.stringify({})),
   };
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
 
@@ -45,6 +39,21 @@ export abstract class StlbBaseGcomponent {
     [StlcResizerSide.Right]: new StlbResizer(StlcResizerSide.Right, this),
     [StlcResizerSide.Bottom]: new StlbResizer(StlcResizerSide.Bottom, this),
   };
+
+  public get positionConstraints(): { [key in SComponentPositionConstraintDirection]?: number } {
+    return JSON.parse(<string>this._properties['positionConstraints'].value);
+  }
+  public set positionConstraints(v: { [key in SComponentPositionConstraintDirection]?: number }) {
+    this.setProperty(new SComponentProperty<string>('positionConstraints', JSON.stringify(v)));
+  }
+
+  public get parentGComp() {
+    return this._parentGComp;
+  }
+
+  public get childComps() {
+    return [...this._childComps];
+  }
 
   public get x(): number {
     return <number>this._properties['x'].value;
@@ -80,10 +89,21 @@ export abstract class StlbBaseGcomponent {
     this._container.addChild(this.graphics);
 
     StlbStore.default.dispatch(
-      addComponent({ id: this.id, properties: { ...this._properties } })
+      addComponent({
+        id: this.id,
+        properties: { ...this._properties },
+      })
     );
 
     if (this.id !== StlbGlobals.RootCompId) this.bindevents();
+  }
+
+  setParentGComponent(parent: StlbBaseGComponent) {
+    this._parentGComp = parent;
+  }
+
+  addChildComps(...gComps: StlbBaseGComponent[]) {
+    gComps.forEach((c) => this._childComps.push(c));
   }
 
   bindevents() {
@@ -101,13 +121,12 @@ export abstract class StlbBaseGcomponent {
     if (property.name === 'x') {
       this._container.position.x = (<SComponentProperty<number>>property).value;
 
-      this.redraw();
+      this.drawGraphics();
     } else if (property.name === 'y') {
       this._container.position.y = (<SComponentProperty<number>>property).value;
 
-      this.redraw();
+      this.drawGraphics();
     } else if (property.name === 'width') {
-      // this._container.width = (<SComponentProperty<number>>property).value;
       this.graphics.width = (<SComponentProperty<number>>property).value;
 
       this.redraw();
@@ -118,9 +137,7 @@ export abstract class StlbBaseGcomponent {
       this.redraw();
     }
 
-    StlbStore.default.dispatch(
-      setComponentProperty({ compId: this.id, property })
-    );
+    StlbStore.default.dispatch(setComponentProperty({ compId: this.id, property }));
 
     this._onPropertyChange.next({ ...property });
 
@@ -134,6 +151,11 @@ export abstract class StlbBaseGcomponent {
   renderTo(parent: Container) {}
 
   redraw() {
+    this.drawGraphics();
+    this.drawChildrenGraphics();
+  }
+
+  drawGraphics() {
     this._container.removeChildren();
 
     for (const key in StlcResizerSide) {
@@ -146,8 +168,17 @@ export abstract class StlbBaseGcomponent {
     }
   }
 
-  addChild(gcomp: StlbBaseGcomponent) {
-    this._container.addChild(gcomp._container);
+  drawChildrenGraphics() {
+    this._updateChildrenConstraintPosition();
+
+    this._childComps.forEach((childGComp) => {
+      this._container.addChild(childGComp._container);
+      childGComp.drawGraphics();
+    });
+  }
+
+  addChildToContainer(container: Container) {
+    this._container.addChild(container);
   }
 
   redrawProperty() {
@@ -249,83 +280,126 @@ export abstract class StlbBaseGcomponent {
     });
 
     // GComponent Constraints
-    const constraintsG = new GComponentConstraint();
+    const constraintsG = new GComponentPositionConstraint(
+      Object.keys(this.positionConstraints).map((c) => <SComponentPositionConstraintDirection>+c)
+    );
     constraintsG.container.position.x = currentX;
     constraintsG.container.position.y = currentY;
     constraintsG.redraw();
+    constraintsG.onConstraintChanged.subscribe((constraints) => {
+      const constraintsValues = GComponentPositionConstraint.getCurrentPositionConstraintsValues(constraints, this);
+      this.positionConstraints = constraintsValues;
+    });
 
     currentY += constraintsG.height + padding;
     this.propertyContainer.addChild(constraintsG.container);
   }
+
+  private _updateChildrenConstraintPosition() {
+    // if (Object.keys(this.positionConstraints).length === 0) return;
+
+    // const newPosition = GComponentPositionConstraint.calculateCurrentPositionBasedOnParentGComponent(
+    //   this,
+    //   this._parentGComp,
+    //   this.positionConstraints
+    // );
+
+    // // return
+
+    // this.x = newPosition.x;
+    // this.y = newPosition.y;
+
+    if (this._childComps.length === 0) return;
+
+    this._childComps.forEach((gComp) => {
+      if (Object.keys(gComp.positionConstraints).length === 0) return;
+
+      const newPosition = GComponentPositionConstraint.calculateCurrentPositionBasedOnParentGComponent(
+        gComp,
+        gComp._parentGComp,
+        gComp.positionConstraints
+      );
+
+      gComp.x = newPosition.x ?? gComp.x;
+      gComp.y = newPosition.y ?? gComp.y;
+      gComp.width = newPosition.width ?? gComp.width;
+      gComp.height = newPosition.height ?? gComp.height;
+    });
+  }
 }
 
-enum GComponentConstraintDirection {
-  Left,
-  Top,
-  Right,
-  Bottom,
-  CenterHorizontal,
-  CenterVertical,
-}
-
-class GComponentConstraint {
+class GComponentPositionConstraint {
   public readonly container = new Container();
   public readonly width = 140;
   public readonly height = 70;
+
+  constructor(selectedConstraints: SComponentPositionConstraintDirection[] = []) {
+    selectedConstraints.forEach((selectedConst) => {
+      this._constraints[selectedConst].isSelected = true;
+    });
+  }
+
+  // Current selected constraints will pass
+  public readonly onConstraintChanged = new Subject<SComponentPositionConstraintDirection[]>();
 
   private _strokeStyle = { width: 1, color: 'black' };
   private _selectedStrokeStyle = { width: 2, color: 'blue' };
 
   private _constraints: {
-    [key in GComponentConstraintDirection]: {
+    [key in SComponentPositionConstraintDirection]: {
       graphics: Graphics;
       isSelected: boolean;
+      direction: SComponentPositionConstraintDirection;
     };
   } = {
-    [GComponentConstraintDirection.Left]: {
+    [SComponentPositionConstraintDirection.Left]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.Left,
     },
-    [GComponentConstraintDirection.Top]: {
+    [SComponentPositionConstraintDirection.Top]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.Top,
     },
-    [GComponentConstraintDirection.Right]: {
+    [SComponentPositionConstraintDirection.Right]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.Right,
     },
-    [GComponentConstraintDirection.Bottom]: {
+    [SComponentPositionConstraintDirection.Bottom]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.Bottom,
     },
-    [GComponentConstraintDirection.CenterHorizontal]: {
+    [SComponentPositionConstraintDirection.CenterHorizontal]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.CenterHorizontal,
     },
-    [GComponentConstraintDirection.CenterVertical]: {
+    [SComponentPositionConstraintDirection.CenterVertical]: {
       graphics: new Graphics(),
       isSelected: false,
+      direction: SComponentPositionConstraintDirection.CenterVertical,
     },
   };
 
   private _linkedDirections = [
     [
-      GComponentConstraintDirection.Left,
-      GComponentConstraintDirection.CenterHorizontal,
-      GComponentConstraintDirection.Right,
+      SComponentPositionConstraintDirection.Left,
+      SComponentPositionConstraintDirection.CenterHorizontal,
+      SComponentPositionConstraintDirection.Right,
     ],
     [
-      GComponentConstraintDirection.Top,
-      GComponentConstraintDirection.CenterVertical,
-      GComponentConstraintDirection.Bottom,
+      SComponentPositionConstraintDirection.Top,
+      SComponentPositionConstraintDirection.CenterVertical,
+      SComponentPositionConstraintDirection.Bottom,
     ],
   ];
 
-  private _currentConstraintDirection?: GComponentConstraintDirection;
+  private _currentConstraintDirection?: SComponentPositionConstraintDirection;
 
-  private _changeConstraintDirectionTo(
-    direction: GComponentConstraintDirection
-  ) {
+  private _changeConstraintDirectionTo(direction: SComponentPositionConstraintDirection) {
     this._currentConstraintDirection = direction;
 
     const constraint = this._constraints[direction];
@@ -337,17 +411,17 @@ class GComponentConstraint {
       this._linkedDirections.forEach((linkedDirections) => {
         linkedDirections.forEach((linkedDirection) => {
           if (linkedDirection === direction) {
-            linkedDirections.forEach(
-              (d) =>
-                (this._constraints[d].isSelected =
-                  d !== direction ? false : true)
-            );
+            linkedDirections.forEach((d) => (this._constraints[d].isSelected = d !== direction ? false : true));
           }
         });
       });
     }
 
-    this.redraw();
+    const currentConstraints = Object.values(this._constraints)
+      .filter((constr) => constr.isSelected)
+      .map((x) => x.direction);
+    this.onConstraintChanged.next(currentConstraints);
+    // this.redraw();
   }
 
   redraw() {
@@ -356,14 +430,12 @@ class GComponentConstraint {
     const padding = 5;
     const constLineWidth = 12;
 
-    const bgG = new Graphics()
-      .rect(0, 0, this.width, this.height)
-      .fill(0xefeeee);
+    const bgG = new Graphics().rect(0, 0, this.width, this.height).fill(0xefeeee);
 
     this.container.addChild(bgG);
 
     Object.keys(this._constraints).forEach((key) => {
-      const constDirection = <GComponentConstraintDirection>+key;
+      const constDirection = <SComponentPositionConstraintDirection>+key;
       const constraint = this._constraints[constDirection];
 
       let moveXTo = 0;
@@ -371,36 +443,32 @@ class GComponentConstraint {
       let lineXTo = 0;
       let lineYTo = 0;
 
-      if (constDirection === GComponentConstraintDirection.Left) {
+      if (constDirection === SComponentPositionConstraintDirection.Left) {
         moveXTo = padding;
         moveYTo = this.height / 2;
         lineXTo = padding + constLineWidth;
         lineYTo = this.height / 2;
-      } else if (constDirection === GComponentConstraintDirection.Top) {
+      } else if (constDirection === SComponentPositionConstraintDirection.Top) {
         moveXTo = this.width / 2;
         moveYTo = padding;
         lineXTo = this.width / 2;
         lineYTo = padding + constLineWidth;
-      } else if (constDirection === GComponentConstraintDirection.Right) {
+      } else if (constDirection === SComponentPositionConstraintDirection.Right) {
         moveXTo = this.width - constLineWidth - padding;
         moveYTo = this.height / 2;
         lineXTo = this.width - padding;
         lineYTo = this.height / 2;
-      } else if (constDirection === GComponentConstraintDirection.Bottom) {
+      } else if (constDirection === SComponentPositionConstraintDirection.Bottom) {
         moveXTo = this.width / 2;
         moveYTo = this.height - constLineWidth - padding;
         lineXTo = this.width / 2;
         lineYTo = this.height - padding;
-      } else if (
-        constDirection === GComponentConstraintDirection.CenterHorizontal
-      ) {
+      } else if (constDirection === SComponentPositionConstraintDirection.CenterHorizontal) {
         moveXTo = this.width / 2 - constLineWidth / 2;
         moveYTo = this.height / 2;
         lineXTo = this.width / 2 + constLineWidth / 2;
         lineYTo = this.height / 2;
-      } else if (
-        constDirection === GComponentConstraintDirection.CenterVertical
-      ) {
+      } else if (constDirection === SComponentPositionConstraintDirection.CenterVertical) {
         moveXTo = this.width / 2;
         moveYTo = this.height / 2 - constLineWidth / 2;
         lineXTo = this.width / 2;
@@ -411,9 +479,7 @@ class GComponentConstraint {
       constraint.graphics
         .moveTo(moveXTo, moveYTo)
         .lineTo(lineXTo, lineYTo)
-        .stroke(
-          constraint.isSelected ? this._selectedStrokeStyle : this._strokeStyle
-        );
+        .stroke(constraint.isSelected ? this._selectedStrokeStyle : this._strokeStyle);
       constraint.graphics.eventMode = 'static';
       constraint.graphics.hitArea = new Circle(
         moveXTo + Math.abs(lineXTo - moveXTo) / 2,
@@ -427,5 +493,61 @@ class GComponentConstraint {
 
       this.container.addChild(constraint.graphics);
     });
+  }
+
+  public static getCurrentPositionConstraintsValues(
+    currentConstraints: SComponentPositionConstraintDirection[],
+    currentGComp: StlbBaseGComponent
+  ) {
+    const constraints: { [key in SComponentPositionConstraintDirection]?: number } = {};
+
+    currentConstraints.forEach((constraint) => {
+      if (constraint === SComponentConstraintDirection.Left) {
+        constraints[SComponentConstraintDirection.Left] = currentGComp.x;
+      } else if (constraint === SComponentConstraintDirection.Top) {
+        constraints[SComponentConstraintDirection.Top] = currentGComp.y;
+      } else if (constraint === SComponentConstraintDirection.Right) {
+        constraints[SComponentConstraintDirection.Right] =
+          currentGComp.parentGComp.width - currentGComp.x - currentGComp.width;
+      } else if (constraint === SComponentConstraintDirection.Bottom) {
+        constraints[SComponentConstraintDirection.Bottom] =
+          currentGComp.parentGComp.height - currentGComp.y - currentGComp.height;
+      } else if (constraint === SComponentConstraintDirection.CenterHorizontal) {
+        constraints[SComponentConstraintDirection.CenterHorizontal] = undefined;
+      } else if (constraint === SComponentConstraintDirection.CenterVertical) {
+        constraints[SComponentConstraintDirection.CenterVertical] = undefined;
+      }
+    });
+
+    return constraints;
+  }
+
+  public static calculateCurrentPositionBasedOnParentGComponent(
+    currentGComp: StlbBaseGComponent,
+    parentGComp: StlbBaseGComponent,
+    constraints: { [key in SComponentPositionConstraintDirection]?: number }
+  ): { x?: number; y?: number; width?: number; height?: number } {
+    const newPosition: { x?: number; y?: number; width?: number; height?: number } = {};
+
+    Object.keys(constraints).forEach((key) => {
+      const constraint = <SComponentConstraintDirection>+key;
+      const constraintValue = constraints[constraint];
+
+      if (constraint === SComponentConstraintDirection.Left) {
+        newPosition.x = constraintValue!;
+      } else if (constraint === SComponentConstraintDirection.Top) {
+        newPosition.y = constraintValue!;
+      } else if (constraint === SComponentConstraintDirection.Right) {        
+        newPosition.width = parentGComp.width - currentGComp.x - constraintValue!;
+      } else if (constraint === SComponentConstraintDirection.Bottom) {
+        newPosition.height = parentGComp.height - currentGComp.y - constraintValue!;
+      } else if (constraint === SComponentConstraintDirection.CenterHorizontal) {
+        newPosition.x = (parentGComp.x + parentGComp.width) / 2 - currentGComp.width / 2;
+      } else if (constraint === SComponentConstraintDirection.CenterVertical) {
+        newPosition.y = (parentGComp.y + parentGComp.height) / 2 - currentGComp.height / 2;
+      }
+    });
+
+    return newPosition;
   }
 }

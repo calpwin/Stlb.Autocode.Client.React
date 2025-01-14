@@ -1,4 +1,4 @@
-import { StlbBaseGcomponent, StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
+import { StlbBaseGComponent, StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
 import { Container, Graphics, Text } from 'pixi.js';
 import watch from 'redux-watch';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
@@ -8,7 +8,7 @@ import { Stlbinput } from 'packages/stlb-base/src/gcomponent/stlb-input';
 
 export class GComponentPropertyEditor {
   private _propInput = new Stlbinput();
-  private _selectedGComp?: StlbBaseGcomponent;
+  private _selectedGComp?: StlbBaseGComponent;
 
   renderTo(parent: Container) {
     var container = new Container();
@@ -44,6 +44,7 @@ export class GComponentPropertyEditor {
         this._selectedGComp = compList.getComponentById(newVal)!;
 
         this._selectedGComp.redrawProperty();
+        container.removeChildren();
         container.addChild(this._selectedGComp.propertyContainer);
       })
     );

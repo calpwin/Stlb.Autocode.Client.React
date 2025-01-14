@@ -33,10 +33,11 @@ export class GComponentEditor {
     const rectG = new StlbRectangleGComponent(StlbGlobals.RootCompId);
     gComponentList.addComponent(rectG);
 
-    // gComponentList.addComponent(rectG);
-
-    // parent.addChild(container);
-
-    // return container;
+    const innerRectG = new StlbRectangleGComponent(rectG.id);    
+    gComponentList.addComponent(innerRectG);
+    innerRectG.x = 20;
+    innerRectG.y = 20;
+    innerRectG.width = rectG.width / 2;
+    innerRectG.height = rectG.height / 2;        
   }
 }

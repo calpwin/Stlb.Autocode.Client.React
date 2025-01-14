@@ -4,7 +4,7 @@ import {
   FederatedPointerEvent,
   Graphics,
 } from 'pixi.js';
-import { StlbBaseGcomponent } from './stlb-base-gcomponent';
+import { StlbBaseGComponent } from './stlb-base-gcomponent';
 import { StlbGlobals } from '../globals';
 import { debounce } from 'ts-debounce';
 
@@ -28,7 +28,7 @@ export class StlbResizer {
 
   constructor(
     public readonly side: StlcResizerSide,
-    private readonly _parentGComp: StlbBaseGcomponent
+    private readonly _parentGComp: StlbBaseGComponent
   ) {
     this._bindEvents();
   }

@@ -1,9 +1,9 @@
 import { Container, Graphics } from 'pixi.js';
 import { GComponentList } from './gcomponent-list';
-import { StlbBaseGcomponent } from './stlb-base-gcomponent';
+import { StlbBaseGComponent } from './stlb-base-gcomponent';
 import { StlbGlobals } from '../globals';
 
-export class StlbEditorGComponent extends StlbBaseGcomponent {
+export class StlbEditorGComponent extends StlbBaseGComponent {
   constructor() {
     super('none', StlbGlobals.RootCompId);
 
@@ -13,7 +13,7 @@ export class StlbEditorGComponent extends StlbBaseGcomponent {
     this.y = 0;
   }
 
-  redraw(): void {
+  drawGraphics(): void {
     const containerG = new Graphics()
       .rect(
         0,

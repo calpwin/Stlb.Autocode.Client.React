@@ -1,8 +1,8 @@
-import { StlbBaseGcomponent } from '@stlb-autocode/stlb-base';
-import { Container, Graphics } from 'pixi.js';
+import { StlbBaseGComponent } from '@stlb-autocode/stlb-base';
+import { Color, Container, Graphics } from 'pixi.js';
 
-export class StlbRectangleGComponent extends StlbBaseGcomponent {
-  private readonly _rectangleG = new Graphics().rect(0, 0, 100, 200).fill('red');
+export class StlbRectangleGComponent extends StlbBaseGComponent {
+  private readonly _rectangleG = new Graphics().rect(0, 0, 100, 200).fill('#'+(0x1033000+Math.random()*0xffeeff).toString(16).substr(1,6));
 
   constructor(parentCompId: string) {
     super(parentCompId);
@@ -16,15 +16,15 @@ export class StlbRectangleGComponent extends StlbBaseGcomponent {
   renderTo(parent: Container) {
     super.renderTo(parent);    
 
-    this.redraw();
+    this.drawGraphics();
 
     parent.addChild(this._container);
 
     return this._container;
   }
 
-  redraw(): void {
-    super.redraw();
+  drawGraphics(): void {
+    super.drawGraphics();
     
     this._rectangleG.width = this.width;
     this._rectangleG.height = this.height;

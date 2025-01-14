@@ -1,28 +1,31 @@
 import { injectable } from 'inversify';
-import { StlbBaseGcomponent } from './stlb-base-gcomponent';
+import { StlbBaseGComponent } from './stlb-base-gcomponent';
 import { StlbEditorGComponent } from './stlb-editor.gcomponent';
 import { StlbGlobals } from '../globals';
 
 @injectable()
 export class GComponentList {
-  private readonly _components: { [compId: string]: StlbBaseGcomponent } = {};
+  private readonly _components: { [compId: string]: StlbBaseGComponent } = {};
 
   constructor() {
     const rootGComp = new StlbEditorGComponent();
     this._components[StlbGlobals.RootCompId] = rootGComp;
 
-    rootGComp.redraw();
+    rootGComp.drawGraphics();
 
     StlbGlobals.app.stage.addChild(rootGComp._container);
   }
 
-  addComponent(comp: StlbBaseGcomponent) {
+  addComponent(comp: StlbBaseGComponent) {
     this._components[comp.id] = comp;
 
     const parentGComp = this._components[comp.parentCompId];
-    parentGComp.addChild(comp);
+    parentGComp.addChildToContainer(comp._container);
 
-    comp.redraw();
+    comp.setParentGComponent(parentGComp);
+    parentGComp.addChildComps(comp);
+
+    comp.redraw();    
   }
 
   removeComponent(compid: string) {
@@ -33,7 +36,7 @@ export class GComponentList {
     delete this._components[compid];
   }
 
-  getComponentById(id: string): StlbBaseGcomponent | undefined {
+  getComponentById(id: string): StlbBaseGComponent | undefined {
     if (id in this._components === false) return undefined;
 
     return this._components[id];

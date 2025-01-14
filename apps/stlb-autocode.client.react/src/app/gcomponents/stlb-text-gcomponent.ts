@@ -1,7 +1,7 @@
 import { Container, ContainerChild, Text, validFormats } from 'pixi.js';
-import { StlbBaseGcomponent } from '@stlb-autocode/stlb-base';
+import { StlbBaseGComponent } from '@stlb-autocode/stlb-base';
 
-export class StlbTextGComponent extends StlbBaseGcomponent {
+export class StlbTextGComponent extends StlbBaseGComponent {
   constructor(parentCompId: string) {
     super(parentCompId);
 
