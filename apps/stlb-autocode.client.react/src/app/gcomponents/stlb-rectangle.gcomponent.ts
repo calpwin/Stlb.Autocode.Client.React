@@ -7,10 +7,10 @@ export class StlbRectangleGComponent extends StlbBaseGcomponent {
   constructor(parentCompId: string) {
     super(parentCompId);
 
-    this.setProperty({ name: 'width', value: 200 });
-    this.setProperty({ name: 'height', value: 100 });
-    this.setProperty({ name: 'x', value: 100 });
-    this.setProperty({ name: 'y', value: 100 });
+    this.width = 200;
+    this.height = 100;
+    this.x = 100;
+    this.y = 100    
   }
 
   renderTo(parent: Container) {
@@ -26,15 +26,8 @@ export class StlbRectangleGComponent extends StlbBaseGcomponent {
   redraw(): void {
     super.redraw();
     
-    // this._container.removeChild(this.graphics);
-    // this._rectangleG = new Graphics().rect(0,0,100,70).fill('red');
-    // this.graphics.clear();
-    // this.graphics.rect(0,0,20,20);
-    // this.graphics.fill('red');
-    this._rectangleG.width = this.getProperty<number>('width').value;
-    this._rectangleG.height = this.getProperty<number>('height').value;
+    this._rectangleG.width = this.width;
+    this._rectangleG.height = this.height;
     this._container.addChild(this._rectangleG);
-
-    // this._container.addChild(this._rectangleG);
   }
 }

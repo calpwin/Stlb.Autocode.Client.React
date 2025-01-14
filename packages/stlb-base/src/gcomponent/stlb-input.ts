@@ -1,10 +1,12 @@
 import {
+  Container,
   Text,
 } from 'pixi.js';
 import { Subject } from 'rxjs';
 
 export class Stlbinput {
   public readonly onChanged = new Subject<string>();
+  public readonly container = new Container();
 
   private _inputText: string = '';
   public get inputText(): string {
@@ -50,6 +52,8 @@ export class Stlbinput {
       this._isActive = true;
     });
 
-    return this._textG;
+    this.container.addChild(this._textG);
+
+    return this.container;
   }
 }

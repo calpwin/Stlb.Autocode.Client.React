@@ -12,18 +12,6 @@ export class SComponent {
   ) {}
 }
 
-// export class StlbExtensions {
-//   static sComponentDeepCopy(comp: SComponent) {
-//     return new SComponent('dsds', {});
-//     const properties: { [name: string]: SComponentProperty } = {};
-
-//     Object.keys(comp.properties).forEach((key) => {
-//       properties[key] = { ...comp.properties[key] };
-//     });
-//     return new SComponent(comp.id, properties);
-//   }
-// }
-
 export interface StlbBaseState {
   components: { [compId: string]: SComponent };
   selectedComponentId?: string;

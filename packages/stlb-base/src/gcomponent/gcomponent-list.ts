@@ -1,17 +1,15 @@
 import { injectable } from 'inversify';
 import { StlbBaseGcomponent } from './stlb-base-gcomponent';
-import { StlbGComponentEditor } from './stlb-editor.gcomponent';
+import { StlbEditorGComponent } from './stlb-editor.gcomponent';
 import { StlbGlobals } from '../globals';
 
 @injectable()
 export class GComponentList {
-  static readonly RootCompId = 'dfs-fd-33e-ds2232-1';
-
   private readonly _components: { [compId: string]: StlbBaseGcomponent } = {};
 
   constructor() {
-    const rootGComp = new StlbGComponentEditor();
-    this._components[GComponentList.RootCompId] = rootGComp;
+    const rootGComp = new StlbEditorGComponent();
+    this._components[StlbGlobals.RootCompId] = rootGComp;
 
     rootGComp.redraw();
 

@@ -27,11 +27,11 @@ export class LogicDataBlock {
   }
 
   private _renderProperty(name: string, index: number) {
-    const propInputG = new Stlbinput().render();
-    propInputG.text = name;
-    propInputG.position.set(20, 13 + 20 * index);
+    const propInputG = new Stlbinput();
+    propInputG.inputText = name;
+    propInputG.container.position.set(20, 13 + 20 * index);
 
-    this._container.addChild(propInputG);
+    this._container.addChild(propInputG.render());
 
     const circle = new Graphics().circle(180, 21 * (index + 1), 5).fill('red');
     this._container.addChild(circle);

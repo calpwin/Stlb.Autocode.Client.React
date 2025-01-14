@@ -3,14 +3,14 @@ import { GComponentList } from './gcomponent-list';
 import { StlbBaseGcomponent } from './stlb-base-gcomponent';
 import { StlbGlobals } from '../globals';
 
-export class StlbGComponentEditor extends StlbBaseGcomponent {
+export class StlbEditorGComponent extends StlbBaseGcomponent {
   constructor() {
-    super(GComponentList.RootCompId);
+    super('none', StlbGlobals.RootCompId);
 
-    this.setProperty({ name: 'width', value: StlbGlobals.app.renderer.width - 300 });
-    this.setProperty({ name: 'height', value: (StlbGlobals.app.renderer.height / 3) * 2 });
-    this.setProperty({ name: 'x', value: 0 });
-    this.setProperty({ name: 'y', value: 0 });
+    this.width = StlbGlobals.app.renderer.width - 300;
+    this.height = (StlbGlobals.app.renderer.height / 3) * 2;
+    this.x = 0;
+    this.y = 0;
   }
 
   redraw(): void {
@@ -22,6 +22,6 @@ export class StlbGComponentEditor extends StlbBaseGcomponent {
         (StlbGlobals.app.renderer.height / 3) * 2
       )
       .fill('white');
-    this._container.addChild(containerG);    
+    this._container.addChild(containerG);
   }
 }

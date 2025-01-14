@@ -30,7 +30,7 @@ export class GComponentEditor {
     // const textG = new StlbTextGComponent();
     // textG.renderTo(container);
 
-    const rectG = new StlbRectangleGComponent(GComponentList.RootCompId);
+    const rectG = new StlbRectangleGComponent(StlbGlobals.RootCompId);
     gComponentList.addComponent(rectG);
 
     // gComponentList.addComponent(rectG);

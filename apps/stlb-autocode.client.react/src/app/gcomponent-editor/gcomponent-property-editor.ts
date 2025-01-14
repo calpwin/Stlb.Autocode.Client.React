@@ -1,4 +1,4 @@
-import { StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
+import { StlbBaseGcomponent, StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
 import { Container, Graphics, Text } from 'pixi.js';
 import watch from 'redux-watch';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
@@ -8,7 +8,7 @@ import { Stlbinput } from 'packages/stlb-base/src/gcomponent/stlb-input';
 
 export class GComponentPropertyEditor {
   private _propInput = new Stlbinput();
-  private _selectedGComp?: StlbTextGComponent;
+  private _selectedGComp?: StlbBaseGcomponent;
 
   renderTo(parent: Container) {
     var container = new Container();
@@ -17,13 +17,13 @@ export class GComponentPropertyEditor {
     container.position.x = StlbGlobals.app.renderer.width - 300;
     container.position.y = 0;
 
-    this._propInput.inputText = 'Waitig ...';
-    this._propInput.onChanged.subscribe({
-      next: (text) => {
-        this._selectedGComp?.setProperty({ name: 'name', value: text });
-      },
-    });
-    container.addChild(this._propInput.render());
+    // this._propInput.inputText = 'Waitig ...';
+    // this._propInput.onChanged.subscribe({
+    //   next: (text) => {
+    //     this._selectedGComp?.setProperty({ name: 'name', value: text });
+    //   },
+    // });
+    // container.addChild(this._propInput.render());
 
     var lineG = new Graphics()
       .moveTo(0, 0)
@@ -36,17 +36,15 @@ export class GComponentPropertyEditor {
     const w = watch(StlbStore.default.getState, 'stlbbase.selectedComponentId');
     StlbStore.default.subscribe(
       w((newVal?: string, oldVal?: string) => {
-        return; //TODO
-        // if (!newVal) return;
+        if (!newVal) return;
 
-        // const compList = StlbIoc.get<GComponentList>(
-        //   StlbIocTypes.GComponentList
-        // );
-        // this._selectedGComp = <StlbTextGComponent>(
-        //   compList.getComponentById(newVal)
-        // );
-        // this._propInput.inputText =
-        //   this._selectedGComp.getProperty<string>('name').value;
+        const compList = StlbIoc.get<GComponentList>(
+          StlbIocTypes.GComponentList
+        );
+        this._selectedGComp = compList.getComponentById(newVal)!;
+
+        this._selectedGComp.redrawProperty();
+        container.addChild(this._selectedGComp.propertyContainer);
       })
     );
 
