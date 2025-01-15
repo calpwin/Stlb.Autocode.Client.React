@@ -1,4 +1,4 @@
-import { StlbGlobals } from '@stlb-autocode/stlb-base';
+import { FlexboxAdapterUtil, StlbGlobals } from '@stlb-autocode/stlb-base';
 import { Container, Graphics, Text } from 'pixi.js';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
 import { StlbIoc } from '@stlb-autocode/stlb-base';
@@ -7,21 +7,7 @@ import { StlbIocTypes } from 'packages/stlb-base/src/IoC/ioc-types';
 import { StlbRectangleGComponent } from '../gcomponents/stlb-rectangle.gcomponent';
 
 export class GComponentEditor {
-  render() {
-  //   var container = new Container();
-  //   container.width = StlbGlobals.app.renderer.width - 300;
-  //   container.height = (StlbGlobals.app.renderer.height / 3) * 2;
-  //   container.position.x = 0;
-  //   container.position.y = 0;
-  //   const containerG = new Graphics()
-  //     .rect(
-  //       0,
-  //       0,
-  //       StlbGlobals.app.renderer.width - 300,
-  //       (StlbGlobals.app.renderer.height / 3) * 2
-  //     )
-  //     .fill('white');
-  //   container.addChild(containerG);
+  render() {  
 
     const gComponentList = StlbIoc.get<GComponentList>(
       StlbIocTypes.GComponentList
@@ -29,6 +15,8 @@ export class GComponentEditor {
 
     // const textG = new StlbTextGComponent();
     // textG.renderTo(container);
+
+    // -------------------
 
     const rectG = new StlbRectangleGComponent(StlbGlobals.RootCompId);
     gComponentList.addComponent(rectG);
@@ -39,5 +27,16 @@ export class GComponentEditor {
     innerRectG.y = 20;
     innerRectG.width = rectG.width / 2;
     innerRectG.height = rectG.height / 2;        
+
+    // -------------------
+
+    // const rootGComp = gComponentList.getComponentById(StlbGlobals.RootCompId);
+
+    // const flexbox = new FlexboxAdapterUtil();
+    // flexbox.redraw();
+    // flexbox.testContainer.position.x = 400;
+    // flexbox.testContainer.position.y = 70;
+    // rootGComp?._container.addChild(flexbox.testContainer);
+
   }
 }

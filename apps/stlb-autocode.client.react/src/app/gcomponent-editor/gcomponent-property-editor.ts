@@ -17,14 +17,6 @@ export class GComponentPropertyEditor {
     container.position.x = StlbGlobals.app.renderer.width - 300;
     container.position.y = 0;
 
-    // this._propInput.inputText = 'Waitig ...';
-    // this._propInput.onChanged.subscribe({
-    //   next: (text) => {
-    //     this._selectedGComp?.setProperty({ name: 'name', value: text });
-    //   },
-    // });
-    // container.addChild(this._propInput.render());
-
     var lineG = new Graphics()
       .moveTo(0, 0)
       .lineTo(0, (StlbGlobals.app.renderer.height / 3) * 2)
@@ -32,6 +24,9 @@ export class GComponentPropertyEditor {
 
     container.addChild(lineG);
     parent.addChild(container);
+
+    let currentX = 0;
+    let currentY = container.getBounds().rectangle.height;
 
     const w = watch(StlbStore.default.getState, 'stlbbase.selectedComponentId');
     StlbStore.default.subscribe(
@@ -46,8 +41,15 @@ export class GComponentPropertyEditor {
         this._selectedGComp.redrawProperty();
         container.removeChildren();
         container.addChild(this._selectedGComp.propertyContainer);
+
+        currentY = this._selectedGComp.propertyContainer.getBounds().rectangle.height;
+
+        container.addChild(new Graphics().rect(0, currentY, 70, 40).fill('red'));
+        console.log(currentY);
       })
     );
+
+    
 
     return container;
   }

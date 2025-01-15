@@ -13,6 +13,8 @@ import { Subject } from 'rxjs';
 import { StlbResizer, StlcResizerSide } from './resizer';
 import { Stlbinput } from './stlb-input';
 import { StlbGlobals } from '../globals';
+import { StlbIoc } from '../IoC/inversify.config';
+import { FlexboxAdapterUtil } from '../utils/flexbox-adapter.util';
 
 export abstract class StlbBaseGComponent {
   public readonly id!: string;
@@ -184,6 +186,8 @@ export abstract class StlbBaseGComponent {
   redrawProperty() {
     this.propertyContainer.removeChildren();
 
+    const propGrapchics: Container[] = [];
+
     const padding = 10;
 
     let currentX = padding;
@@ -202,8 +206,8 @@ export abstract class StlbBaseGComponent {
 
     currentX += 55 + 70 + padding;
 
-    this.propertyContainer.addChild(xG);
-    this.propertyContainer.addChild(xInputG.render());
+    propGrapchics.push(xG);
+    propGrapchics.push(xInputG.render());
 
     xInputG.onChanged.subscribe({
       next: (value) => {
@@ -225,8 +229,8 @@ export abstract class StlbBaseGComponent {
     currentX = padding;
     currentY += 20 + padding;
 
-    this.propertyContainer.addChild(yG);
-    this.propertyContainer.addChild(yInputG.render());
+    propGrapchics.push(yG);
+    propGrapchics.push(yInputG.render());
 
     yInputG.onChanged.subscribe({
       next: (value) => {
@@ -247,8 +251,8 @@ export abstract class StlbBaseGComponent {
 
     currentX += 55 + 70 + padding;
 
-    this.propertyContainer.addChild(widthG);
-    this.propertyContainer.addChild(widthInputG.render());
+    propGrapchics.push(widthG);
+    propGrapchics.push(widthInputG.render());
 
     widthInputG.onChanged.subscribe({
       next: (value) => {
@@ -270,8 +274,8 @@ export abstract class StlbBaseGComponent {
     currentX = padding;
     currentY += 20 + padding;
 
-    this.propertyContainer.addChild(heightG);
-    this.propertyContainer.addChild(heightInputG.render());
+    propGrapchics.push(heightG);
+    propGrapchics.push(heightInputG.render());
 
     heightInputG.onChanged.subscribe({
       next: (value) => {
@@ -291,8 +295,29 @@ export abstract class StlbBaseGComponent {
       this.positionConstraints = constraintsValues;
     });
 
+    currentX = padding;
     currentY += constraintsG.height + padding;
-    this.propertyContainer.addChild(constraintsG.container);
+
+    propGrapchics.push(constraintsG.container);
+
+    // Flexbox adapter property
+    const flexboxAdapter = StlbIoc.get<FlexboxAdapterUtil>(FlexboxAdapterUtil);
+    const flexboxAdapterG = flexboxAdapter.redrawPropertyEditor();
+    flexboxAdapterG.position.x = currentX;
+    flexboxAdapterG.position.y = currentY;
+
+    propGrapchics.push(flexboxAdapterG);
+
+    currentX = padding;
+    currentY += flexboxAdapterG.getBounds().height + padding;
+
+    // Add all prop graphics
+    this.propertyContainer.addChild(
+      new Graphics().rect(0, 0, this.propertyContainer.getBounds().rectangle.width, currentY).fill('white')
+    );
+    propGrapchics.forEach((propG) => {
+      this.propertyContainer.addChild(propG);
+    });
   }
 
   private _updateChildrenConstraintPosition() {
@@ -537,7 +562,7 @@ class GComponentPositionConstraint {
         newPosition.x = constraintValue!;
       } else if (constraint === SComponentConstraintDirection.Top) {
         newPosition.y = constraintValue!;
-      } else if (constraint === SComponentConstraintDirection.Right) {        
+      } else if (constraint === SComponentConstraintDirection.Right) {
         newPosition.width = parentGComp.width - currentGComp.x - constraintValue!;
       } else if (constraint === SComponentConstraintDirection.Bottom) {
         newPosition.height = parentGComp.height - currentGComp.y - constraintValue!;
