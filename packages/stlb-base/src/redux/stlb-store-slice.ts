@@ -4,6 +4,39 @@ export class SComponentProperty<T = string | number> {
   constructor(public readonly name: string, public value: T) {}
 }
 
+// #region Flexbox align
+export enum SComponentFlexboxAlignDirection {
+  Horizontal,
+  Vertical,
+}
+
+export enum SComponentFlexboxAutoAlign {
+  Start,
+  Center,
+  End,
+}
+
+export enum SComponentFlexboxFixAlign {
+  TopLeft,
+  TopCenter,
+  TopRight,
+  Left,
+  Center,
+  Right,
+  BottomLeft,
+  BottomCenter,
+  BottomRight,
+}
+
+export class SComponentFlexboxAlign {
+  constructor(
+    public isAutoAlign: boolean,
+    public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,
+    public direction: SComponentFlexboxAlignDirection
+  ) {}
+}
+// #endregion
+
 export enum SComponentConstraintDirection {
   Left,
   Top,
@@ -14,10 +47,7 @@ export enum SComponentConstraintDirection {
 }
 
 export class SComponent {
-  constructor(
-    public readonly id: string,
-    public readonly properties: { [name: string]: SComponentProperty }    
-  ) {}
+  constructor(public readonly id: string, public readonly properties: { [name: string]: SComponentProperty }) {}
 }
 
 export interface StlbBaseState {
@@ -35,10 +65,7 @@ export const counterSlice = createSlice({
     addComponent: (state, action: PayloadAction<SComponent>) => {
       state.components[action.payload.id] = action.payload;
     },
-    setComponentSettings: (
-      state,
-      action: PayloadAction<{ compId: string; property: SComponentProperty }>
-    ) => {
+    setComponentSettings: (state, action: PayloadAction<{ compId: string; property: SComponentProperty }>) => {
       const comp = state.components[action.payload.compId];
       comp.properties[action.payload.property.name] = {
         ...action.payload.property,
@@ -55,11 +82,6 @@ export const counterSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const {
-  addComponent,
-  selectComponent,
-  unselectComponent,
-  setComponentSettings,
-} = counterSlice.actions;
+export const { addComponent, selectComponent, unselectComponent, setComponentSettings } = counterSlice.actions;
 
 export default counterSlice.reducer;

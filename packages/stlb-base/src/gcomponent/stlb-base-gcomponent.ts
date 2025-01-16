@@ -3,17 +3,20 @@ import * as StlbStore from '../redux/stlb-store';
 import {
   addComponent,
   SComponentConstraintDirection,
+  SComponentFlexboxAlign,
+  SComponentFlexboxAlignDirection,
+  SComponentFlexboxAutoAlign,
   SComponentConstraintDirection as SComponentPositionConstraintDirection,
   SComponentProperty,
   selectComponent,
   setComponentSettings as setComponentProperty,
+  unselectComponent,
 } from '../redux/stlb-store-slice';
 import { Guid } from 'guid-typescript';
 import { Subject } from 'rxjs';
 import { StlbResizer, StlcResizerSide } from './resizer';
 import { Stlbinput } from './stlb-input';
 import { StlbGlobals } from '../globals';
-import { StlbIoc } from '../IoC/inversify.config';
 import { FlexboxAdapterUtil } from '../utils/flexbox-adapter.util';
 
 export abstract class StlbBaseGComponent {
@@ -32,8 +35,16 @@ export abstract class StlbBaseGComponent {
     ['width']: new SComponentProperty('width', 0),
     ['height']: new SComponentProperty('height', 0),
     ['positionConstraints']: new SComponentProperty('positionConstraints', JSON.stringify({})),
+    ['flexboxAlign']: new SComponentProperty(
+      'flexboxAlign',
+      JSON.stringify(
+        new SComponentFlexboxAlign(true, SComponentFlexboxAutoAlign.Start, SComponentFlexboxAlignDirection.Vertical)
+      )
+    ),
   };
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
+
+  private _isCurrentCompSelected = false;
 
   private readonly _resizers: { [key in StlcResizerSide]: StlbResizer } = {
     [StlcResizerSide.Left]: new StlbResizer(StlcResizerSide.Left, this),
@@ -47,6 +58,13 @@ export abstract class StlbBaseGComponent {
   }
   public set positionConstraints(v: { [key in SComponentPositionConstraintDirection]?: number }) {
     this.setProperty(new SComponentProperty<string>('positionConstraints', JSON.stringify(v)));
+  }
+
+  public get flexboxAlign(): SComponentFlexboxAlign {
+    return JSON.parse(<string>this._properties['flexboxAlign'].value);
+  }
+  public set flexboxAlign(v: SComponentFlexboxAlign) {
+    this.setProperty(new SComponentProperty<string>('flexboxAlign', JSON.stringify(v)));
   }
 
   public get parentGComp() {
@@ -85,6 +103,21 @@ export abstract class StlbBaseGComponent {
     this.setProperty(new SComponentProperty<number>('height', v));
   }
 
+  public get isSelected(): boolean {
+    return this._isCurrentCompSelected;
+  }
+  public set isSelected(isSelected: boolean) {
+    this._isCurrentCompSelected = isSelected;
+
+    if (isSelected) {
+      StlbStore.default.dispatch(selectComponent({ compId: this.id }));
+    } else {
+      StlbStore.default.dispatch(unselectComponent());
+    }
+
+    this.redraw();
+  }
+
   constructor(public readonly parentCompId: string, _id?: string) {
     this.id = _id ?? Guid.create().toString();
 
@@ -113,7 +146,9 @@ export abstract class StlbBaseGComponent {
     this._container.on('click', (e) => {
       StlbStore.default.dispatch(selectComponent({ compId: this.id }));
 
-      e.stopImmediatePropagation();
+      this.redraw();
+
+      e.stopPropagation();
     });
   }
 
@@ -137,6 +172,8 @@ export abstract class StlbBaseGComponent {
       this.graphics.height = (<SComponentProperty<number>>property).value;
 
       this.redraw();
+    } else if (property.name === 'flexboxAlign') {
+      this.redraw();
     }
 
     StlbStore.default.dispatch(setComponentProperty({ compId: this.id, property }));
@@ -155,28 +192,32 @@ export abstract class StlbBaseGComponent {
   redraw() {
     this.drawGraphics();
     this.drawChildrenGraphics();
+
+    this._updateChildrenFlexboxAlign();
   }
 
   drawGraphics() {
     this._container.removeChildren();
 
-    for (const key in StlcResizerSide) {
-      Object.keys(StlcResizerSide).forEach((key) => {
-        if (+key >= 0) {
-          const resizerG = this._resizers[+key as 0 | 1 | 2 | 3].render();
-          this._container.addChild(resizerG);
-        }
-      });
+    if (this.isSelected) {
+      for (const key in StlcResizerSide) {
+        Object.keys(StlcResizerSide).forEach((key) => {
+          if (+key >= 0) {
+            const resizerG = this._resizers[+key as 0 | 1 | 2 | 3].render();
+            this._container.addChild(resizerG);
+          }
+        });
+      }
     }
   }
 
   drawChildrenGraphics() {
-    this._updateChildrenConstraintPosition();
-
     this._childComps.forEach((childGComp) => {
       this._container.addChild(childGComp._container);
       childGComp.drawGraphics();
     });
+
+    this._updateChildrenConstraintPosition();
   }
 
   addChildToContainer(container: Container) {
@@ -301,10 +342,13 @@ export abstract class StlbBaseGComponent {
     propGrapchics.push(constraintsG.container);
 
     // Flexbox adapter property
-    const flexboxAdapter = StlbIoc.get<FlexboxAdapterUtil>(FlexboxAdapterUtil);
+    const flexboxAdapter = new FlexboxAdapterUtil(this.flexboxAlign);
     const flexboxAdapterG = flexboxAdapter.redrawPropertyEditor();
     flexboxAdapterG.position.x = currentX;
     flexboxAdapterG.position.y = currentY;
+    flexboxAdapter.onAlignChanged.subscribe((newAlign) => {
+      this.flexboxAlign = newAlign;
+    });
 
     propGrapchics.push(flexboxAdapterG);
 
@@ -321,19 +365,6 @@ export abstract class StlbBaseGComponent {
   }
 
   private _updateChildrenConstraintPosition() {
-    // if (Object.keys(this.positionConstraints).length === 0) return;
-
-    // const newPosition = GComponentPositionConstraint.calculateCurrentPositionBasedOnParentGComponent(
-    //   this,
-    //   this._parentGComp,
-    //   this.positionConstraints
-    // );
-
-    // // return
-
-    // this.x = newPosition.x;
-    // this.y = newPosition.y;
-
     if (this._childComps.length === 0) return;
 
     this._childComps.forEach((gComp) => {
@@ -350,6 +381,32 @@ export abstract class StlbBaseGComponent {
       gComp.width = newPosition.width ?? gComp.width;
       gComp.height = newPosition.height ?? gComp.height;
     });
+  }
+
+  private _updateChildrenFlexboxAlign() {
+    if (this._childComps.length === 0) return;
+
+    const childrenPosAndBounds = this._childComps.map((child) => ({
+      x: child.x,
+      y: child.y,
+      width: child.width,
+      height: child.height,
+    }));
+
+    const newChildrenPosAndBounds = FlexboxAdapterUtil.applyAlign(
+      childrenPosAndBounds,
+      { width: this.width, height: this.height },
+      this.flexboxAlign.direction,
+      <SComponentFlexboxAutoAlign>this.flexboxAlign.align
+    );
+
+    for (let index = 0; index < this._childComps.length; index++) {
+      const childComp = this._childComps[index];
+      const newChildPosAndBounds = newChildrenPosAndBounds[index];
+
+      childComp.x = newChildPosAndBounds.x;
+      childComp.y = newChildPosAndBounds.y;
+    }
   }
 }
 

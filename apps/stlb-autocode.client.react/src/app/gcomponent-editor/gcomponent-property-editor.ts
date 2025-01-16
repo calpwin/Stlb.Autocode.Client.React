@@ -44,8 +44,7 @@ export class GComponentPropertyEditor {
 
         currentY = this._selectedGComp.propertyContainer.getBounds().rectangle.height;
 
-        container.addChild(new Graphics().rect(0, currentY, 70, 40).fill('red'));
-        console.log(currentY);
+        container.addChild(new Graphics().rect(0, currentY, 70, 40).fill('red'));        
       })
     );
 

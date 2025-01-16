@@ -85,8 +85,7 @@ export class TextProcessor {
     });
   }
 
-  private _handleKeyDown(event: KeyboardEvent): any {
-    console.log(event.key);
+  private _handleKeyDown(event: KeyboardEvent): any {    
 
     switch (event.key) {
       case 'Backspace':

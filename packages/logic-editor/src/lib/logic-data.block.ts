@@ -42,8 +42,7 @@ export class LogicDataBlock {
     this._container.addChild(nextBtn);
 
     nextBtn.eventMode = 'static';
-    nextBtn.on('click', (e) => {
-      console.log(e.globalY);
+    nextBtn.on('click', (e) => {      
 
       fetch('http://127.0.0.1:5149/get-logic-blocks', {
         method: 'post',

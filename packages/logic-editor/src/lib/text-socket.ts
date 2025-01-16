@@ -11,18 +11,14 @@ export class TextSocket {
     this._socket.onmessage = this.onMessage;
   }
 
-  onMessage = (e: any) => {
-    console.log(e);
-
+  onMessage = (e: any) => {    
     const eventMsg = JSON.parse(e.data) as EventMessage;
 
     this.messageRecievedEvent.emit('event', eventMsg);
   };
 
   sendMessage(event: SelectVariantMessage) {
-    var msgJson = JSON.stringify(event);
-
-    console.log(msgJson);
+    var msgJson = JSON.stringify(event);    
 
     this._socket.send(msgJson);
   }

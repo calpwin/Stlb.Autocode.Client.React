@@ -23,9 +23,10 @@ export class GComponentList {
     parentGComp.addChildToContainer(comp._container);
 
     comp.setParentGComponent(parentGComp);
+    this._bindEventsToComp(comp);
     parentGComp.addChildComps(comp);
 
-    comp.redraw();    
+    comp.redraw();
   }
 
   removeComponent(compid: string) {
@@ -40,5 +41,18 @@ export class GComponentList {
     if (id in this._components === false) return undefined;
 
     return this._components[id];
+  }
+
+  private _bindEventsToComp(comp: StlbBaseGComponent) {
+    comp._container.on('click', (e) => {
+      Object.keys(this._components).forEach((key) => {
+        const _comp = this._components[key];
+        _comp.isSelected = false;
+      });
+
+      comp.isSelected = true;
+
+      e.stopPropagation();
+    });
   }
 }
