@@ -1,5 +1,4 @@
-import { injectable } from 'inversify';
-import { Circle, Container, Graphics, GraphicsPath, TextureMatrix } from 'pixi.js';
+import { Circle, Container, Graphics, GraphicsPath, Text, TextureMatrix } from 'pixi.js';
 import { Subject } from 'rxjs';
 import {
   SComponentFlexboxAlign,
@@ -8,16 +7,11 @@ import {
   SComponentFlexboxFixAlign,
 } from '../redux/stlb-store-slice';
 
-@injectable()
 export class FlexboxAdapterUtil {
   public readonly testContainer = new Container();
   public readonly propertyEditorContainer = new Container();
 
   public readonly onAlignChanged = new Subject<SComponentFlexboxAlign>();
-
-  // private _isAutoAlign: boolean = true;
-  // private _alignDirection: SComponentFlexboxAlignDirection = SComponentFlexboxAlignDirection.Horizontal;
-  // private _align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign = SComponentFlexboxAutoAlign.Start;
 
   private readonly _testElsBounds = [
     {
@@ -48,6 +42,7 @@ export class FlexboxAdapterUtil {
   private readonly _propEditorCellGapVertical = (this._propEditorHeight - this._propEditorPadding * 2) / 2;
   private readonly _alignCellGraphicsFill = 'blue';
 
+  private readonly _fixAlignGraphicsBounds = { width: 2, heightMin: 6, heightMedium: 7, heightMax: 10 };
   private readonly _autoAlignGraphicsBounds = { width: 2, heightCenter: 6, heightEnds: 10 };
 
   private propEditorFieldCells: {
@@ -55,6 +50,10 @@ export class FlexboxAdapterUtil {
       x: number;
       y: number;
       graphics: Graphics;
+
+      fixHorizontalAlignGraphics: Graphics;
+      fixVerticalAlignGraphics: Graphics;
+
       autoHorizontalAlignGrapchis: Graphics;
       autoVerticalAlignGrapchis: Graphics;
     };
@@ -63,6 +62,39 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding,
       y: this._propEditorPadding,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.width, this._fixAlignGraphicsBounds.heightMedium)
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.heightMedium, this._fixAlignGraphicsBounds.width)
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -80,6 +112,44 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal,
       y: this._propEditorPadding,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.width, this._fixAlignGraphicsBounds.heightMedium)
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -89,7 +159,7 @@ export class FlexboxAdapterUtil {
       autoVerticalAlignGrapchis: new Graphics().rect(
         0,
         0,
-        this._autoAlignGraphicsBounds.heightCenter,
+        this._autoAlignGraphicsBounds.heightEnds,
         this._autoAlignGraphicsBounds.width
       ),
     },
@@ -97,6 +167,44 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal * 2,
       y: this._propEditorPadding,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.width, this._fixAlignGraphicsBounds.heightMedium)
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -115,6 +223,44 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding,
       y: this._propEditorPadding + this._propEditorCellGapVertical,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.heightMedium, this._fixAlignGraphicsBounds.width)
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -132,6 +278,49 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal,
       y: this._propEditorPadding + this._propEditorCellGapVertical,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -149,6 +338,49 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal * 2,
       y: this._propEditorPadding + this._propEditorCellGapVertical,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -167,6 +399,44 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding,
       y: this._propEditorPadding + this._propEditorCellGapVertical * 2,
       graphics: new Graphics(),
+
+      // Fix aliogn
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(0, 0, this._fixAlignGraphicsBounds.heightMedium, this._fixAlignGraphicsBounds.width)
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -184,6 +454,49 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal,
       y: this._propEditorPadding + this._propEditorCellGapVertical * 2,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMedium / 2,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax / 2 - this._fixAlignGraphicsBounds.heightMin / 2,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -201,6 +514,49 @@ export class FlexboxAdapterUtil {
       x: this._propEditorPadding + this._propEditorCellGapHorizontal * 2,
       y: this._propEditorPadding + this._propEditorCellGapVertical * 2,
       graphics: new Graphics(),
+
+      // Fix align
+      fixHorizontalAlignGraphics: new Graphics()
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMedium
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width + 2,
+          0,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMax
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width,
+          this._fixAlignGraphicsBounds.heightMin
+        ),
+
+      fixVerticalAlignGraphics: new Graphics()
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMedium,
+          0,
+          this._fixAlignGraphicsBounds.heightMedium,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          0,
+          this._fixAlignGraphicsBounds.width + 2,
+          this._fixAlignGraphicsBounds.heightMax,
+          this._fixAlignGraphicsBounds.width
+        )
+        .rect(
+          this._fixAlignGraphicsBounds.heightMax - this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width * 2 + 4,
+          this._fixAlignGraphicsBounds.heightMin,
+          this._fixAlignGraphicsBounds.width
+        ),
+
+      // Auto align
       autoHorizontalAlignGrapchis: new Graphics().rect(
         0,
         0,
@@ -221,12 +577,103 @@ export class FlexboxAdapterUtil {
   redrawPropertyEditor() {
     this.propertyEditorContainer.removeChildren();
 
+    // #region direction & fix/auto Buttons
+
+    const btnBounds = { width: 35, height: 25 };
+
+    // Button auto or fix align direction
+    const btnAutoOrFixAlignG = new Graphics().rect(0, 0, btnBounds.width, btnBounds.height).fill(0xefeeee);
+    btnAutoOrFixAlignG.eventMode = 'static';
+    btnAutoOrFixAlignG.hitArea = new Circle(btnBounds.width / 2, btnBounds.height / 2, btnBounds.height / 2);
+    btnAutoOrFixAlignG.on('click', () => {
+      if (this.flexboxAlign.isAutoAlign) {
+        this.onAlignChanged.next({ ...this.flexboxAlign, isAutoAlign: false });
+      } else {
+        this.onAlignChanged.next({ ...this.flexboxAlign, isAutoAlign: true, align: SComponentFlexboxAutoAlign.Start });
+      }
+    });
+    const btnAutoOrFixAlignTextG = new Text({
+      style: {
+        fill: !this.flexboxAlign.isAutoAlign ? 'blue' : 'black',
+        fontSize: 15,
+      },
+    });
+    btnAutoOrFixAlignTextG.text = 'A/F';
+    btnAutoOrFixAlignTextG.position.x = btnBounds.width / 2 - 11;
+    btnAutoOrFixAlignTextG.position.y = 5;
+
+    btnAutoOrFixAlignG.addChild(btnAutoOrFixAlignTextG);
+    this.propertyEditorContainer.addChild(btnAutoOrFixAlignG);
+
+    // Button Horizontal direction
+    const btnHorizontalDirectionG = new Graphics()
+      .rect(btnBounds.width + 5, 0, btnBounds.width, btnBounds.height)
+      .fill(0xefeeee);
+    btnHorizontalDirectionG.eventMode = 'static';
+    btnHorizontalDirectionG.hitArea = new Circle(
+      btnBounds.width + 5 + btnBounds.width / 2,
+      btnBounds.height / 2,
+      btnBounds.height / 2
+    );
+    btnHorizontalDirectionG.on('click', () => {
+      this.onAlignChanged.next({
+        ...this.flexboxAlign,
+        direction: SComponentFlexboxAlignDirection.Horizontal,
+      });
+    });
+    const btnHorizontalDirectionTextG = new Text({
+      style: {
+        fill: this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Horizontal ? 'blue' : 'black',
+        fontSize: 15,
+      },
+    });
+    btnHorizontalDirectionTextG.text = 'H';
+    btnHorizontalDirectionTextG.position.x = btnBounds.width + 5 + btnBounds.width / 2 - 5;
+    btnHorizontalDirectionTextG.position.y = 5;
+
+    btnHorizontalDirectionG.addChild(btnHorizontalDirectionTextG);
+    this.propertyEditorContainer.addChild(btnHorizontalDirectionG);
+
+    // Button Vertical direction
+    const btnVerticalDirectionG = new Graphics()
+      .rect((btnBounds.width + 5) * 2, 0, btnBounds.width, btnBounds.height)
+      .fill(0xefeeee);
+    btnVerticalDirectionG.eventMode = 'static';
+    btnVerticalDirectionG.hitArea = new Circle(
+      (btnBounds.width + 5) * 2 + btnBounds.width / 2,
+      btnBounds.height / 2,
+      btnBounds.height / 2
+    );
+    btnVerticalDirectionG.on('click', () => {
+      this.onAlignChanged.next({
+        ...this.flexboxAlign,
+        direction: SComponentFlexboxAlignDirection.Vertical,
+      });
+    });
+    const btnVerticalDirectionTextG = new Text({
+      style: {
+        fill: this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Vertical ? 'blue' : 'black',
+        fontSize: 15,
+      },
+    });
+    btnVerticalDirectionTextG.text = 'V';
+    btnVerticalDirectionTextG.position.x = (btnBounds.width + 5) * 2 + btnBounds.width / 2 - 5;
+    btnVerticalDirectionTextG.position.y = 5;
+
+    btnVerticalDirectionG.addChild(btnVerticalDirectionTextG);
+    this.propertyEditorContainer.addChild(btnVerticalDirectionG);
+
+    // #endregion
+
+    const bgContainer = new Container();
+    bgContainer.position.x = 120;
+    bgContainer.position.y = 0;
     const propEditorWidth = 150;
     const propEditorHeight = 80;
-
     const propEditoBgG = new Graphics().rect(0, 0, propEditorWidth, propEditorHeight).fill(0xefeeee);
 
-    this.propertyEditorContainer.addChild(propEditoBgG);
+    bgContainer.addChild(propEditoBgG);
+    this.propertyEditorContainer.addChild(bgContainer);
 
     Object.keys(this.propEditorFieldCells).forEach((key) => {
       const cellAlign = <SComponentFlexboxFixAlign>+key;
@@ -234,8 +681,8 @@ export class FlexboxAdapterUtil {
 
       cell.graphics.circle(cell.x, cell.y, 1).fill('black');
       cell.graphics.eventMode = 'static';
-      cell.graphics.hitArea = new Circle(cell.x, cell.y, 5);
-      cell.graphics.on('click', () => this._oncCellClick(cell, cellAlign));
+      cell.graphics.hitArea = new Circle(cell.x, cell.y, 10);
+      cell.graphics.on('click', () => this._oncCellClick(cellAlign));
 
       let isCellInSelectedAlign = false;
       if (this.flexboxAlign.isAutoAlign) {
@@ -247,8 +694,8 @@ export class FlexboxAdapterUtil {
         alignCellGraphics.position.x = cell.x - alignCellGraphics.getBounds().width / 2;
         alignCellGraphics.position.y = cell.y - alignCellGraphics.getBounds().height / 2;
         alignCellGraphics.eventMode = 'static';
-        alignCellGraphics.hitArea = new Circle(cell.x, cell.y, 5);
-        alignCellGraphics.on('click', () => this._oncCellClick(cell, cellAlign));
+        alignCellGraphics.hitArea = new Circle(cell.x, cell.y, 15);
+        alignCellGraphics.on('click', () => this._oncCellClick(cellAlign));
 
         if (
           FlexboxAdapterUtil.isAutoAlignBelongsToAlign(
@@ -257,29 +704,41 @@ export class FlexboxAdapterUtil {
             this.flexboxAlign.direction
           )
         ) {
-          this.propertyEditorContainer.addChild(alignCellGraphics);
+          bgContainer.addChild(alignCellGraphics);
+          isCellInSelectedAlign = true;
+        }
+      } else {
+        if (this.flexboxAlign.align === cellAlign) {
+          const alignCellGraphics =
+            this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Horizontal
+              ? cell.fixHorizontalAlignGraphics.fill(this._alignCellGraphicsFill)
+              : cell.fixVerticalAlignGraphics.fill(this._alignCellGraphicsFill);
+          alignCellGraphics.position.x = cell.x - alignCellGraphics.getBounds().width / 2;
+          alignCellGraphics.position.y = cell.y - alignCellGraphics.getBounds().height / 2;
+          alignCellGraphics.eventMode = 'static';
+          alignCellGraphics.hitArea = new Circle(cell.x, cell.y, 15);
+          alignCellGraphics.on('click', () => this._oncCellClick(cellAlign));
+
+          bgContainer.addChild(alignCellGraphics);
           isCellInSelectedAlign = true;
         }
       }
 
-      if (!isCellInSelectedAlign) this.propertyEditorContainer.addChild(cell.graphics);
+      if (!isCellInSelectedAlign) bgContainer.addChild(cell.graphics);
     });
 
     return this.propertyEditorContainer;
   }
 
-  private _oncCellClick(
-    cell: {
-      x: number;
-      y: number;
-      graphics: Graphics;
-      autoHorizontalAlignGrapchis: Graphics;
-      autoVerticalAlignGrapchis: Graphics;
-    },
-    cellAlign: SComponentFlexboxFixAlign
-  ) {
-    const newAutoAlign = FlexboxAdapterUtil._autoAlignDirectionByCellAlign(cellAlign, this.flexboxAlign.direction);
-    this.onAlignChanged.next(new SComponentFlexboxAlign(true, newAutoAlign, this.flexboxAlign.direction));
+  private _oncCellClick(cellAlign: SComponentFlexboxFixAlign) {
+    let nextCellAlign: SComponentFlexboxFixAlign | SComponentFlexboxAutoAlign = cellAlign;
+
+    if (this.flexboxAlign.isAutoAlign)
+      nextCellAlign = FlexboxAdapterUtil._autoAlignDirectionByCellAlign(cellAlign, this.flexboxAlign.direction);
+
+    this.onAlignChanged.next(
+      new SComponentFlexboxAlign(this.flexboxAlign.isAutoAlign, nextCellAlign, this.flexboxAlign.direction)
+    );
   }
 
   redrawTest() {
@@ -493,15 +952,4 @@ export class FlexboxAdapterUtil {
           align === SComponentFlexboxFixAlign.Right ||
           align === SComponentFlexboxFixAlign.BottomRight;
   }
-
-  // private static isCenterAlign(align: FlexboxFixAlign) {
-  //   if (
-  //     align === FlexboxFixAlign.TopCenter ||
-  //     align === FlexboxFixAlign.Center ||
-  //     align === FlexboxFixAlign.BottomCenter
-  //   )
-  //     return true;
-
-  //   return false;
-  // }
 }
