@@ -71,7 +71,7 @@ export abstract class StlbBaseGComponent {
   public setPadding(value: number, direction: SComponentPaddingDirection) {
     this._paddings[direction].value = value;
 
-    this.setProperty(new SComponentProperty<string>('paddings', JSON.stringify(this._paddings)));    
+    this.setProperty(new SComponentProperty<string>('paddings', JSON.stringify(this._paddings)));
   }
 
   public get positionConstraints(): { [key in SComponentPositionConstraintDirection]?: number } {
@@ -342,6 +342,39 @@ export abstract class StlbBaseGComponent {
       },
     });
 
+    // Paddings
+    const paddingstLeftRightInputG = new Stlbinput('PL');
+    paddingstLeftRightInputG.container.position.x = currentX;
+    paddingstLeftRightInputG.container.position.y = currentY;
+    paddingstLeftRightInputG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
+    paddingstLeftRightInputG.onChanged.subscribe({
+      next: (value) => {
+        const paddingValue = parseInt(value);
+        this.setPadding(paddingValue, SComponentPaddingDirection.Left);
+        this.setPadding(paddingValue, SComponentPaddingDirection.Right);
+      },
+    });
+
+    currentX += paddingstLeftRightInputG.width + padding;
+
+    const paddingstTopBottomInputG = new Stlbinput('PT');
+    paddingstTopBottomInputG.container.position.x = currentX;
+    paddingstTopBottomInputG.container.position.y = currentY;
+    paddingstTopBottomInputG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
+    paddingstTopBottomInputG.onChanged.subscribe({
+      next: (value) => {
+        const paddingValue = parseInt(value);
+        this.setPadding(paddingValue, SComponentPaddingDirection.Top);
+        this.setPadding(paddingValue, SComponentPaddingDirection.Bottom);
+      },
+    });
+
+    currentX = padding;
+    currentY += paddingstLeftRightInputG.height * 2 + padding;
+
+    propGrapchics.push(paddingstLeftRightInputG.render());
+    propGrapchics.push(paddingstTopBottomInputG.render());
+
     // GComponent Constraints
     const constraintsG = new GComponentPositionConstraint(
       Object.keys(this.positionConstraints).map((c) => <SComponentPositionConstraintDirection>+c)
@@ -423,7 +456,7 @@ export abstract class StlbBaseGComponent {
     for (let index = 0; index < this._childComps.length; index++) {
       const childComp = this._childComps[index];
       const newChildPosAndBounds = applyResult.elPositionsAndBounds[index];
-      
+
       childComp.x = this._paddings[SComponentPaddingDirection.Left].value + newChildPosAndBounds.x;
       childComp.y = this._paddings[SComponentPaddingDirection.Top].value + newChildPosAndBounds.y;
     }
