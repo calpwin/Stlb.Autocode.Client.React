@@ -4,10 +4,9 @@ import watch from 'redux-watch';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
 import { GComponentList } from 'packages/stlb-base/src/gcomponent/gcomponent-list';
 import { StlbIocTypes } from 'packages/stlb-base/src/IoC/ioc-types';
-import { Stlbinput } from 'packages/stlb-base/src/gcomponent/stlb-input';
 
 export class GComponentPropertyEditor {
-  private _propInput = new Stlbinput();
+  
   private _selectedGComp?: StlbBaseGComponent;
 
   renderTo(parent: Container) {

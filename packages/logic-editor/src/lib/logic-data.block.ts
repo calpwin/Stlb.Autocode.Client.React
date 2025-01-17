@@ -27,7 +27,7 @@ export class LogicDataBlock {
   }
 
   private _renderProperty(name: string, index: number) {
-    const propInputG = new Stlbinput();
+    const propInputG = new Stlbinput(name);
     propInputG.inputText = name;
     propInputG.container.position.set(20, 13 + 20 * index);
 

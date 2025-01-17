@@ -240,7 +240,7 @@ export abstract class StlbBaseGComponent {
     xG.position.y = currentY;
     xG.text = 'x:';
 
-    const xInputG = new Stlbinput();
+    const xInputG = new Stlbinput('X');
     xInputG.container.position.x = currentX + 55;
     xInputG.container.position.y = currentY;
     xInputG.inputText = this.x.toFixed(0);
@@ -262,7 +262,7 @@ export abstract class StlbBaseGComponent {
     yG.position.y = currentY;
     yG.text = 'y:';
 
-    const yInputG = new Stlbinput();
+    const yInputG = new Stlbinput('Y');
     yInputG.container.position.x = currentX + 55 + padding;
     yInputG.container.position.y = currentY;
     yInputG.inputText = this.y.toFixed(0);
@@ -285,7 +285,7 @@ export abstract class StlbBaseGComponent {
     widthG.position.y = currentY;
     widthG.text = 'width:';
 
-    const widthInputG = new Stlbinput();
+    const widthInputG = new Stlbinput('W');
     widthInputG.container.position.x = currentX + 55;
     widthInputG.container.position.y = currentY;
     widthInputG.inputText = this.width.toFixed(0);
@@ -307,7 +307,7 @@ export abstract class StlbBaseGComponent {
     heightG.position.y = currentY;
     heightG.text = 'height:';
 
-    const heightInputG = new Stlbinput();
+    const heightInputG = new Stlbinput('H');
     heightInputG.container.position.x = currentX + 55 + padding;
     heightInputG.container.position.y = currentY;
     heightInputG.inputText = this.height.toFixed(0);
