@@ -235,87 +235,63 @@ export abstract class StlbBaseGComponent {
     let currentY = padding;
 
     /// X
-    const xG = new Text({ style: { fontSize: 13, fill: 'black' } });
-    xG.position.x = currentX;
-    xG.position.y = currentY;
-    xG.text = 'x:';
+    const xInput = new Stlbinput('X');
+    xInput.container.position.x = currentX;
+    xInput.container.position.y = currentY;
+    xInput.inputText = this.x.toFixed(0);
 
-    const xInputG = new Stlbinput('X');
-    xInputG.container.position.x = currentX + 55;
-    xInputG.container.position.y = currentY;
-    xInputG.inputText = this.x.toFixed(0);
+    currentX += xInput.width;
 
-    currentX += 55 + 70 + padding;
+    propGrapchics.push(xInput.render());
 
-    propGrapchics.push(xG);
-    propGrapchics.push(xInputG.render());
-
-    xInputG.onChanged.subscribe({
+    xInput.onChanged.subscribe({
       next: (value) => {
         this.x = parseInt(value);
       },
     });
 
     /// Y
-    const yG = new Text({ style: { fontSize: 13, fill: 'black' } });
-    yG.position.x = currentX;
-    yG.position.y = currentY;
-    yG.text = 'y:';
-
-    const yInputG = new Stlbinput('Y');
-    yInputG.container.position.x = currentX + 55 + padding;
-    yInputG.container.position.y = currentY;
-    yInputG.inputText = this.y.toFixed(0);
+    const yInput = new Stlbinput('Y');
+    yInput.container.position.x = currentX + padding;
+    yInput.container.position.y = currentY;
+    yInput.inputText = this.y.toFixed(0);
 
     currentX = padding;
     currentY += 20 + padding;
 
-    propGrapchics.push(yG);
-    propGrapchics.push(yInputG.render());
+    propGrapchics.push(yInput.render());
 
-    yInputG.onChanged.subscribe({
+    yInput.onChanged.subscribe({
       next: (value) => {
         this.y = parseInt(value);
       },
     });
 
-    /// Width
-    const widthG = new Text({ style: { fontSize: 13, fill: 'black' } });
-    widthG.position.x = currentX;
-    widthG.position.y = currentY;
-    widthG.text = 'width:';
+    /// Width    
+    const widthInput = new Stlbinput('W');
+    widthInput.container.position.x = currentX;
+    widthInput.container.position.y = currentY;
+    widthInput.inputText = this.width.toFixed(0);
 
-    const widthInputG = new Stlbinput('W');
-    widthInputG.container.position.x = currentX + 55;
-    widthInputG.container.position.y = currentY;
-    widthInputG.inputText = this.width.toFixed(0);
+    currentX += widthInput.width;
 
-    currentX += 55 + 70 + padding;
+    propGrapchics.push(widthInput.render());
 
-    propGrapchics.push(widthG);
-    propGrapchics.push(widthInputG.render());
-
-    widthInputG.onChanged.subscribe({
+    widthInput.onChanged.subscribe({
       next: (value) => {
         this.width = parseInt(value);
       },
     });
 
-    /// Height
-    const heightG = new Text({ style: { fontSize: 13, fill: 'black' } });
-    heightG.position.x = currentX;
-    heightG.position.y = currentY;
-    heightG.text = 'height:';
-
+    /// Height    
     const heightInputG = new Stlbinput('H');
-    heightInputG.container.position.x = currentX + 55 + padding;
+    heightInputG.container.position.x = currentX + padding;
     heightInputG.container.position.y = currentY;
     heightInputG.inputText = this.height.toFixed(0);
 
     currentX = padding;
     currentY += 20 + padding;
 
-    propGrapchics.push(heightG);
     propGrapchics.push(heightInputG.render());
 
     heightInputG.onChanged.subscribe({
