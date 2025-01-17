@@ -1,10 +1,41 @@
-import { Container, FederatedMouseEvent, Graphics, Rectangle, Text } from 'pixi.js';
+import { Container, ensureAttributes, FederatedMouseEvent, Graphics, Rectangle, Text } from 'pixi.js';
 import { Subject } from 'rxjs';
 import { StlbGlobals } from '../globals';
+import { SComponentPropertyType } from '../redux/stlb-store-slice';
 
-export class Stlbinput {
+export abstract class StlbBaseinput<Type extends string | number | boolean> {
+  private _inputValue: string = '';
+  private _inputValueString: string = '';
+
+  public get inputText(): string {
+    return this._inputValue;
+  }
+  public set inputText(v: string) {
+    this._inputValue = v;
+    this._inputValueString = v.toString();
+    this._inputValueTextG.text = this._inputValueString;
+  }
+
+  protected _inputValueTextG: Text = new Text({ style: { fill: 'black', fontSize: 12 } });
+
   public readonly onChanged = new Subject<string>();
   public readonly container = new Container();
+
+  protected _inputWidth = 100;
+  protected readonly _nameWidth = 25;
+  protected readonly _height = 20;
+
+  protected _isActive = false;
+
+  constructor(
+    protected readonly _name: string,
+    width?: number,
+    protected readonly valueType = SComponentPropertyType.String
+  ) {
+    this._inputWidth = width ?? this._inputWidth;
+
+    this._bindKeyvoardEvents();
+  }
 
   public get width() {
     return this._nameWidth + this._inputWidth;
@@ -14,60 +45,39 @@ export class Stlbinput {
     return this._height;
   }
 
-  private _inputWidth = 100;
-  private readonly _nameWidth = 25;
-  private readonly _height = 20;
-
-  private _inputText: string = '';
-  public get inputText(): string {
-    return this._inputText;
-  }
-  public set inputText(v: string) {
-    this._inputText = v;
-    this._textG.text = v;
-  }
-
-  private _isActive = false;
-  private _textG: Text = new Text({ style: { fill: 'black', fontSize: 12 } });
-
-  constructor(private readonly _name: string, width?: number) {
-    this._inputWidth = width ?? this._inputWidth;
-    this._bindKeyvoardEvents();
-  }
-
-  private _bindKeyvoardEvents() {
-    window.addEventListener('keydown', (event: KeyboardEvent) => {
-      if (!this._isActive) return;
-
-      if (event.code === 'Escape') {
-        this._isActive = false;
-
-        this.onChanged.next(this._inputText);
-      } else if (event.code === 'Backspace') {
-        this._inputText = this._inputText.substring(0, this._inputText.length - 1);
-      } else if (event.key.length === 1 && event.key.match(/[a-zA-Z0-9\.\s]/)) {
-        this._inputText += event.key;
-      }
-
-      this._textG.text = this._inputText;
-
-      event.preventDefault();
-    });
-  }
-
-  render() {
+  public render(): Container {
     this.container.removeChildren();
 
     const bgG = new Graphics().rect(0, 0, this._nameWidth + this._inputWidth, this._height).fill('white');
+    this.container.addChild(bgG);
+
+    const buttomLineG = this.drawButtomLineG();
+    this.container.addChild(buttomLineG);
+
+    const nameG = this.drawNameG();
+    this.container.addChild(nameG);
+
+    const inputValueG = this.drawInputValue();
+    this.container.addChild(inputValueG);
+
+    return this.container;
+  }
+
+  drawButtomLineG() {
     const buttomLineG = new Graphics()
       .moveTo(0, this._height)
       .lineTo(this._nameWidth + this._inputWidth, this._height)
       .stroke('black');
 
+    return buttomLineG;
+  }
+
+  // #region Name
+  drawNameG() {
     const onMousemove = (e: FederatedMouseEvent) => this._changeValueByMouse(e);
     let onMouseup = undefined;
     onMouseup = (e: FederatedMouseEvent) => {
-      this.onChanged.next(this._inputText);
+      this.onChanged.next(this.inputText);
 
       this._isMouseValueChangeActive = false;
       StlbGlobals.app.stage.off('mousemove', onMousemove!);
@@ -94,21 +104,7 @@ export class Stlbinput {
     nameTextG.text = this._name + ':';
     nameG.addChild(nameTextG);
 
-    this._textG.text = this._inputText;
-    this._textG.position.x = this._nameWidth + 5;
-    this._textG.position.y = 2;
-    this._textG.eventMode = 'static';
-    this._textG.hitArea = new Rectangle(this._nameWidth, 0, this._nameWidth + this._inputWidth, this._height);
-    this._textG.on('click', () => {
-      this._isActive = true;
-    });
-
-    this.container.addChild(bgG);
-    this.container.addChild(nameG);
-    this.container.addChild(this._textG);
-    this.container.addChild(buttomLineG);
-
-    return this.container;
+    return nameG;
   }
 
   private readonly _mouseValueChangeScale = 2;
@@ -117,11 +113,58 @@ export class Stlbinput {
   private _changeValueByMouse(e: FederatedMouseEvent) {
     if (!this._isMouseValueChangeActive) return;
 
-    const value = parseInt(this._textG.text);
-    this._inputText = (value + e.movementX).toFixed(0);
-    this._textG.text = this._inputText;
+    const value = parseInt(this._inputValueTextG.text);
+    this.inputText = (value + e.movementX).toFixed(0);
+    this._inputValueTextG.text = this.inputText;
 
     e.stopImmediatePropagation();
     e.preventDefault();
+  }
+
+  // #endregion Name
+
+  drawInputValue() {
+    this._inputValueTextG.text = this.inputText;
+    this._inputValueTextG.position.x = this._nameWidth + 5;
+    this._inputValueTextG.position.y = 2;
+    this._inputValueTextG.eventMode = 'static';
+    this._inputValueTextG.hitArea = new Rectangle(this._nameWidth, 0, this._nameWidth + this._inputWidth, this._height);
+    this._inputValueTextG.on('click', () => {
+      this._isActive = true;
+    });
+    
+    return this._inputValueTextG;
+  }
+
+  protected _bindKeyvoardEvents() {
+    window.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (!this._isActive) return;
+
+      if (event.code === 'Escape') {
+        this._isActive = false;
+
+        this.onChanged.next(this._inputValue);
+      } else if (event.code === 'Backspace') {
+        this._inputValue = this._inputValueString.substring(0, this._inputValueString.length - 1);
+      } else if (event.key.length === 1 && event.key.match(/[a-zA-Z0-9\.\s]/)) {
+        this._inputValue += event.key;
+      }
+
+      this._inputValueTextG.text = this._inputValue;
+
+      event.preventDefault();
+    });
+  }
+}
+
+export class StlbTextInput extends StlbBaseinput<string> {
+  constructor(name: string, width?: number) {
+    super(name, width);
+  }
+
+  render() {
+    super.render();    
+
+    return this.container;
   }
 }

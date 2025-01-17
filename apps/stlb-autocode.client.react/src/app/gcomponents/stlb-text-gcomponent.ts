@@ -1,13 +1,14 @@
 import { Container, ContainerChild, Text, validFormats } from 'pixi.js';
 import { StlbBaseGComponent } from '@stlb-autocode/stlb-base';
+import { SComponentPropertyType } from 'packages/stlb-base/src/redux/stlb-store-slice';
 
 export class StlbTextGComponent extends StlbBaseGComponent {
   constructor(parentCompId: string) {
     super(parentCompId);
 
-    this.setProperty({ name: 'name', value: 'Andrei' });
-    this.setProperty({ name: 'width', value: 200 });
-    this.setProperty({ name: 'height', value: 100 });
+    this.setProperty({ name: 'name', value: 'Andrei', type: SComponentPropertyType.String });
+    this.setProperty({ name: 'width', value: 200, type: SComponentPropertyType.Number });
+    this.setProperty({ name: 'height', value: 100, type: SComponentPropertyType.Number });
 
     this._onPropertyChange.subscribe({
       next: (prop) => {

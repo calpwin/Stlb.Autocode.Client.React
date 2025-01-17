@@ -2,7 +2,7 @@ import { Application, Container, Graphics, Text } from 'pixi.js';
 import { TextSocket } from './text-socket';
 import { LogicBlock } from './logic.block';
 import { LogicBlockPopUp } from './logic-block-popup';
-import { Stlbinput } from '../../../stlb-base/src/gcomponent/stlb-input';
+import { StlbTextInput } from '../../../stlb-base/src/gcomponent/stlb-input';
 
 export class LogicDataBlock {
   constructor(
@@ -27,7 +27,7 @@ export class LogicDataBlock {
   }
 
   private _renderProperty(name: string, index: number) {
-    const propInputG = new Stlbinput(name);
+    const propInputG = new StlbTextInput(name);
     propInputG.inputText = name;
     propInputG.container.position.set(20, 13 + 20 * index);
 

@@ -7,6 +7,7 @@ import {
 import { StlbBaseGComponent } from './stlb-base-gcomponent';
 import { StlbGlobals } from '../globals';
 import { debounce } from 'ts-debounce';
+import { SComponentPropertyType } from '../redux/stlb-store-slice';
 
 export enum StlcResizerSide {
   Left,
@@ -124,27 +125,32 @@ export class StlbResizer {
       this._parentGComp.setProperty({
         name: 'x',
         value: this._startXPosition! - xDelta,
+        type: SComponentPropertyType.Number
       });
       this._parentGComp.setProperty({
         name: 'width',
         value: this._startWidth! + xDelta,
+        type: SComponentPropertyType.Number
       });
     } else if (this.side === StlcResizerSide.Top) {
-      this._parentGComp.setProperty({ name: 'y', value: e.client.y });
+      this._parentGComp.setProperty({ name: 'y', value: e.client.y, type: SComponentPropertyType.Number });
       this._parentGComp.setProperty({
         name: 'height',
         value: this._startHeight! + (this._startPointerYPosition! - e.client.y),
+        type: SComponentPropertyType.Number
       });
     } else if (this.side === StlcResizerSide.Right) {
       // this._parentGComp.setProperty({ name: 'x', value: e.client.x });
       this._parentGComp.setProperty({
         name: 'width',
         value: this._startWidth! + (e.client.x - this._startPointerXPosition!),
+        type: SComponentPropertyType.Number
       });
     } else if (this.side === StlcResizerSide.Bottom) {
       this._parentGComp.setProperty({
         name: 'height',
         value: this._startHeight! + (e.client.y - this._startPointerYPosition!),
+        type: SComponentPropertyType.Number
       });
     }
   }

@@ -7,7 +7,7 @@ import {
   SComponentFlexboxAutoAlign,
   SComponentFlexboxFixAlign,
 } from '../redux/stlb-store-slice';
-import { Stlbinput } from '../gcomponent/stlb-input';
+import { StlbTextInput } from '../gcomponent/stlb-input';
 
 export class FlexboxAdapterUtil {
   public readonly testContainer = new Container();
@@ -623,7 +623,7 @@ export class FlexboxAdapterUtil {
     }
 
     // Input Fix Align direction
-    const inputFixAlignDirection = new Stlbinput('F', 50);
+    const inputFixAlignDirection = new StlbTextInput('F', 50);
     inputFixAlignDirection.inputText = this.flexboxAlign.alignFixComponentsGap.toFixed(0);
     const inputFixAlignDirectionG = inputFixAlignDirection.render();
     inputFixAlignDirectionG.x = 0;

@@ -1,7 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export enum SComponentPropertyType {
+  String,
+  Number,
+  Boolean,
+}
+
 export class SComponentProperty<T = string | number> {
-  constructor(public readonly name: string, public value: T) {}
+  constructor(public readonly name: string, public value: T, public readonly type = SComponentPropertyType.String) {}
 }
 
 // #region Flexbox align
@@ -31,13 +37,13 @@ export enum SComponentFlexboxFixAlign {
 export enum SComponentAlignType {
   Absolute,
   Auto,
-  Fix
+  Fix,
 }
 
 export class SComponentFlexboxAlign {
   constructor(
-    public alignType: SComponentAlignType,     
-    public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,    
+    public alignType: SComponentAlignType,
+    public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,
     public direction: SComponentFlexboxAlignDirection,
     public alignFixComponentsGap: number = 0
   ) {}
