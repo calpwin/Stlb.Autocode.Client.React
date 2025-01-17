@@ -2,6 +2,7 @@ import { Circle, Container, Graphics, Text } from 'pixi.js';
 import * as StlbStore from '../redux/stlb-store';
 import {
   addComponent,
+  SComponentAlignType,
   SComponentConstraintDirection,
   SComponentFlexboxAlign,
   SComponentFlexboxAlignDirection,
@@ -20,6 +21,7 @@ import { StlbResizer, StlcResizerSide } from './resizer';
 import { Stlbinput } from './stlb-input';
 import { StlbGlobals } from '../globals';
 import { FlexboxAdapterUtil } from '../utils/flexbox-adapter.util';
+import { StlbGComponentMovier } from './stlb-gcomponent-movier';
 
 export abstract class StlbBaseGComponent {
   public readonly id!: string;
@@ -34,6 +36,8 @@ export abstract class StlbBaseGComponent {
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
 
   private _isCurrentCompSelected = false;
+
+  private readonly _componentMovier = new StlbGComponentMovier(this);
 
   private readonly _resizers: { [key in StlcResizerSide]: StlbResizer } = {
     [StlcResizerSide.Left]: new StlbResizer(StlcResizerSide.Left, this),
@@ -59,7 +63,11 @@ export abstract class StlbBaseGComponent {
     ['flexboxAlign']: new SComponentProperty(
       'flexboxAlign',
       JSON.stringify(
-        new SComponentFlexboxAlign(true, SComponentFlexboxAutoAlign.Start, SComponentFlexboxAlignDirection.Vertical)
+        new SComponentFlexboxAlign(
+          SComponentAlignType.Auto,
+          SComponentFlexboxAutoAlign.Start,
+          SComponentFlexboxAlignDirection.Vertical
+        )
       )
     ),
   };
@@ -86,6 +94,12 @@ export abstract class StlbBaseGComponent {
   }
   public set flexboxAlign(v: SComponentFlexboxAlign) {
     this.setProperty(new SComponentProperty<string>('flexboxAlign', JSON.stringify(v)));
+
+    if (v.alignType === SComponentAlignType.Absolute) {
+      this._componentMovier.enable();
+    } else {
+      this._componentMovier.disable();
+    }
   }
 
   public get parentGComp() {
@@ -404,7 +418,7 @@ export abstract class StlbBaseGComponent {
     propGrapchics.push(flexboxAdapterG);
 
     currentX = padding;
-    currentY += flexboxAdapterG.getBounds().height + padding;
+    currentY += flexboxAdapter.propertyEditorHeight + padding;
 
     // Add all prop graphics
     this.propertyContainer.addChild(
@@ -435,7 +449,7 @@ export abstract class StlbBaseGComponent {
   }
 
   private _updateChildrenFlexboxAlign() {
-    if (this._childComps.length === 0) return;
+    if (this.flexboxAlign.alignType === SComponentAlignType.Absolute || this._childComps.length === 0) return;
 
     const childrenPosAndBounds = this._childComps.map((child) => ({
       x: child.x,
@@ -450,8 +464,6 @@ export abstract class StlbBaseGComponent {
       this.flexboxAlign.direction,
       <SComponentFlexboxAutoAlign>this.flexboxAlign.align
     );
-
-    // if (!applyResult.isApplied) return;
 
     for (let index = 0; index < this._childComps.length; index++) {
       const childComp = this._childComps[index];

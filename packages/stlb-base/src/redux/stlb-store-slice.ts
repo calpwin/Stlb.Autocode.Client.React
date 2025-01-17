@@ -28,9 +28,15 @@ export enum SComponentFlexboxFixAlign {
   BottomRight,
 }
 
+export enum SComponentAlignType {
+  Absolute,
+  Auto,
+  Fix
+}
+
 export class SComponentFlexboxAlign {
   constructor(
-    public isAutoAlign: boolean,
+    public alignType: SComponentAlignType,     
     public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,
     public direction: SComponentFlexboxAlignDirection
   ) {}

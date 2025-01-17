@@ -1,6 +1,7 @@
 import { Circle, Container, Graphics, GraphicsPath, Text, TextureMatrix } from 'pixi.js';
 import { Subject } from 'rxjs';
 import {
+  SComponentAlignType,
   SComponentFlexboxAlign,
   SComponentFlexboxAlignDirection,
   SComponentFlexboxAutoAlign,
@@ -12,6 +13,16 @@ export class FlexboxAdapterUtil {
   public readonly propertyEditorContainer = new Container();
 
   public readonly onAlignChanged = new Subject<SComponentFlexboxAlign>();
+
+  
+  public get propertyEditorWidth() {
+    return this.propertyEditorContainer.getBounds().width;
+  }
+
+  public get propertyEditorHeight() {
+    return 80;
+  }
+  
 
   private readonly _testElsBounds = [
     {
@@ -580,21 +591,26 @@ export class FlexboxAdapterUtil {
     // #region direction & fix/auto Buttons
 
     const btnBounds = { width: 35, height: 25 };
+    const paddings = 10;
 
     // Button auto or fix align direction
     const btnAutoOrFixAlignG = new Graphics().rect(0, 0, btnBounds.width, btnBounds.height).fill(0xefeeee);
     btnAutoOrFixAlignG.eventMode = 'static';
     btnAutoOrFixAlignG.hitArea = new Circle(btnBounds.width / 2, btnBounds.height / 2, btnBounds.height / 2);
     btnAutoOrFixAlignG.on('click', () => {
-      if (this.flexboxAlign.isAutoAlign) {
-        this.onAlignChanged.next({ ...this.flexboxAlign, isAutoAlign: false });
+      if (this.flexboxAlign.alignType === SComponentAlignType.Auto) {
+        this.onAlignChanged.next({ ...this.flexboxAlign, alignType: SComponentAlignType.Fix });
       } else {
-        this.onAlignChanged.next({ ...this.flexboxAlign, isAutoAlign: true, align: SComponentFlexboxAutoAlign.Start });
+        this.onAlignChanged.next({
+          ...this.flexboxAlign,
+          alignType: SComponentAlignType.Auto,
+          align: SComponentFlexboxAutoAlign.Start,
+        });
       }
     });
     const btnAutoOrFixAlignTextG = new Text({
       style: {
-        fill: !this.flexboxAlign.isAutoAlign ? 'blue' : 'black',
+        fill: this.flexboxAlign.alignType === SComponentAlignType.Fix ? 'blue' : 'black',
         fontSize: 15,
       },
     });
@@ -602,8 +618,10 @@ export class FlexboxAdapterUtil {
     btnAutoOrFixAlignTextG.position.x = btnBounds.width / 2 - 11;
     btnAutoOrFixAlignTextG.position.y = 5;
 
-    btnAutoOrFixAlignG.addChild(btnAutoOrFixAlignTextG);
-    this.propertyEditorContainer.addChild(btnAutoOrFixAlignG);
+    if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
+      btnAutoOrFixAlignG.addChild(btnAutoOrFixAlignTextG);
+      this.propertyEditorContainer.addChild(btnAutoOrFixAlignG);
+    }
 
     // Button Horizontal direction
     const btnHorizontalDirectionG = new Graphics()
@@ -623,7 +641,11 @@ export class FlexboxAdapterUtil {
     });
     const btnHorizontalDirectionTextG = new Text({
       style: {
-        fill: this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Horizontal ? 'blue' : 'black',
+        fill:
+          this.flexboxAlign.alignType !== SComponentAlignType.Absolute &&
+          this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Horizontal
+            ? 'blue'
+            : 'black',
         fontSize: 15,
       },
     });
@@ -631,8 +653,10 @@ export class FlexboxAdapterUtil {
     btnHorizontalDirectionTextG.position.x = btnBounds.width + 5 + btnBounds.width / 2 - 5;
     btnHorizontalDirectionTextG.position.y = 5;
 
-    btnHorizontalDirectionG.addChild(btnHorizontalDirectionTextG);
-    this.propertyEditorContainer.addChild(btnHorizontalDirectionG);
+    if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
+      btnHorizontalDirectionG.addChild(btnHorizontalDirectionTextG);
+      this.propertyEditorContainer.addChild(btnHorizontalDirectionG);
+    }
 
     // Button Vertical direction
     const btnVerticalDirectionG = new Graphics()
@@ -652,7 +676,11 @@ export class FlexboxAdapterUtil {
     });
     const btnVerticalDirectionTextG = new Text({
       style: {
-        fill: this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Vertical ? 'blue' : 'black',
+        fill:
+          this.flexboxAlign.alignType !== SComponentAlignType.Absolute &&
+          this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Vertical
+            ? 'blue'
+            : 'black',
         fontSize: 15,
       },
     });
@@ -660,8 +688,42 @@ export class FlexboxAdapterUtil {
     btnVerticalDirectionTextG.position.x = (btnBounds.width + 5) * 2 + btnBounds.width / 2 - 5;
     btnVerticalDirectionTextG.position.y = 5;
 
-    btnVerticalDirectionG.addChild(btnVerticalDirectionTextG);
-    this.propertyEditorContainer.addChild(btnVerticalDirectionG);
+    if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
+      btnVerticalDirectionG.addChild(btnVerticalDirectionTextG);
+      this.propertyEditorContainer.addChild(btnVerticalDirectionG);
+    }
+
+    // Button AlignType
+    const btnAlignTypeG = new Graphics()
+      .rect(0, btnBounds.height + paddings, btnBounds.width, btnBounds.height)
+      .fill(0xefeeee);
+    btnAlignTypeG.eventMode = 'static';
+    btnAlignTypeG.hitArea = new Circle(
+      btnBounds.width / 2,
+      btnBounds.height + paddings + btnBounds.height / 2,
+      btnBounds.height / 2
+    );
+    btnAlignTypeG.on('click', () => {
+      this.onAlignChanged.next({
+        ...this.flexboxAlign,
+        alignType:
+          this.flexboxAlign.alignType === SComponentAlignType.Absolute
+            ? SComponentAlignType.Auto
+            : SComponentAlignType.Absolute,
+      });
+    });
+    const btnAlignTypeTextG = new Text({
+      style: {
+        fill: this.flexboxAlign.alignType === SComponentAlignType.Absolute ? 'blue' : 'black',
+        fontSize: 15,
+      },
+    });
+    btnAlignTypeTextG.text = 'AB';
+    btnAlignTypeTextG.position.x = btnBounds.width / 2 - 10;
+    btnAlignTypeTextG.position.y = btnBounds.height + paddings + 3;
+
+    btnAlignTypeG.addChild(btnAlignTypeTextG);
+    this.propertyEditorContainer.addChild(btnAlignTypeG);
 
     // #endregion
 
@@ -672,8 +734,10 @@ export class FlexboxAdapterUtil {
     const propEditorHeight = 80;
     const propEditoBgG = new Graphics().rect(0, 0, propEditorWidth, propEditorHeight).fill(0xefeeee);
 
-    bgContainer.addChild(propEditoBgG);
-    this.propertyEditorContainer.addChild(bgContainer);
+    if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
+      bgContainer.addChild(propEditoBgG);
+      this.propertyEditorContainer.addChild(bgContainer);
+    }
 
     Object.keys(this.propEditorFieldCells).forEach((key) => {
       const cellAlign = <SComponentFlexboxFixAlign>+key;
@@ -685,7 +749,7 @@ export class FlexboxAdapterUtil {
       cell.graphics.on('click', () => this._oncCellClick(cellAlign));
 
       let isCellInSelectedAlign = false;
-      if (this.flexboxAlign.isAutoAlign) {
+      if (this.flexboxAlign.alignType === SComponentAlignType.Auto) {
         const alignCellGraphics =
           this.flexboxAlign.direction === SComponentFlexboxAlignDirection.Horizontal
             ? cell.autoHorizontalAlignGrapchis
@@ -733,11 +797,11 @@ export class FlexboxAdapterUtil {
   private _oncCellClick(cellAlign: SComponentFlexboxFixAlign) {
     let nextCellAlign: SComponentFlexboxFixAlign | SComponentFlexboxAutoAlign = cellAlign;
 
-    if (this.flexboxAlign.isAutoAlign)
+    if (this.flexboxAlign.alignType === SComponentAlignType.Auto)
       nextCellAlign = FlexboxAdapterUtil._autoAlignDirectionByCellAlign(cellAlign, this.flexboxAlign.direction);
 
     this.onAlignChanged.next(
-      new SComponentFlexboxAlign(this.flexboxAlign.isAutoAlign, nextCellAlign, this.flexboxAlign.direction)
+      new SComponentFlexboxAlign(this.flexboxAlign.alignType, nextCellAlign, this.flexboxAlign.direction)
     );
   }
 
@@ -797,7 +861,7 @@ export class FlexboxAdapterUtil {
         newElPosBound.x = currentX;
         newElPosBound.y = 0;
 
-        currentX += newElPosBound.width + gapX;        
+        currentX += newElPosBound.width + gapX;
       } else if (
         alignDirection === SComponentFlexboxAlignDirection.Horizontal &&
         align === SComponentFlexboxAutoAlign.Center
