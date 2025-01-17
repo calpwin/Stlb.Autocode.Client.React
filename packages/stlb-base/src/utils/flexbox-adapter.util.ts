@@ -755,7 +755,7 @@ export class FlexboxAdapterUtil {
       parentBound,
       SComponentFlexboxAlignDirection.Vertical,
       SComponentFlexboxAutoAlign.Start
-    ).map((elB, index) => ({ ...elB, fill: this._testElsBounds[index].fill }));
+    ).elPositionsAndBounds.map((elB, index) => ({ ...elB, fill: this._testElsBounds[index].fill }));
 
     const testBg = new Graphics().rect(0, 0, parentBound.width, parentBound.height).fill('grey');
     this.testContainer.addChild(testBg);
@@ -772,7 +772,8 @@ export class FlexboxAdapterUtil {
     alignDirection: SComponentFlexboxAlignDirection,
     align: SComponentFlexboxAutoAlign
   ) {
-    if (elPositionsAndBounds.length <= 1) return elPositionsAndBounds;
+    let isApplied = false;
+    if (elPositionsAndBounds.length <= 1) return { isApplied, elPositionsAndBounds };
 
     const newElPositionsAndBounds = [];
 
@@ -796,7 +797,7 @@ export class FlexboxAdapterUtil {
         newElPosBound.x = currentX;
         newElPosBound.y = 0;
 
-        currentX += newElPosBound.width + gapX;
+        currentX += newElPosBound.width + gapX;        
       } else if (
         alignDirection === SComponentFlexboxAlignDirection.Horizontal &&
         align === SComponentFlexboxAutoAlign.Center
@@ -845,7 +846,7 @@ export class FlexboxAdapterUtil {
       newElPositionsAndBounds.push(newElPosBound);
     }
 
-    return newElPositionsAndBounds;
+    return { isApplied: true, elPositionsAndBounds: newElPositionsAndBounds };
   }
 
   private static _autoAlignDirectionByCellAlign(

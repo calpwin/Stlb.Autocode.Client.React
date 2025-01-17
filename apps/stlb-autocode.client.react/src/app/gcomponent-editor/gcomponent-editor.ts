@@ -5,6 +5,7 @@ import { StlbIoc } from '@stlb-autocode/stlb-base';
 import { GComponentList } from 'packages/stlb-base/src/gcomponent/gcomponent-list';
 import { StlbIocTypes } from 'packages/stlb-base/src/IoC/ioc-types';
 import { StlbRectangleGComponent } from '../gcomponents/stlb-rectangle.gcomponent';
+import { SComponentPaddingDirection } from 'packages/stlb-base/src/redux/stlb-store-slice';
 
 export class GComponentEditor {
   render() {  
@@ -36,6 +37,11 @@ export class GComponentEditor {
     innerRectG2.y = 20;
     innerRectG2.width = rectG.width / 4;
     innerRectG2.height = rectG.height / 4;        
+
+    rectG.setPadding(10, SComponentPaddingDirection.Left);
+    rectG.setPadding(10, SComponentPaddingDirection.Top);
+    rectG.setPadding(10, SComponentPaddingDirection.Right);
+    rectG.setPadding(10, SComponentPaddingDirection.Bottom);
 
     // -------------------
 

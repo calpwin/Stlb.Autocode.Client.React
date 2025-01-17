@@ -6,6 +6,8 @@ import {
   SComponentFlexboxAlign,
   SComponentFlexboxAlignDirection,
   SComponentFlexboxAutoAlign,
+  SComponentPadding,
+  SComponentPaddingDirection,
   SComponentConstraintDirection as SComponentPositionConstraintDirection,
   SComponentProperty,
   selectComponent,
@@ -29,19 +31,6 @@ export abstract class StlbBaseGComponent {
   protected _parentGComp!: StlbBaseGComponent;
   protected readonly _childComps: StlbBaseGComponent[] = [];
 
-  private readonly _properties: { [name: string]: SComponentProperty } = {
-    ['x']: new SComponentProperty('x', 0),
-    ['y']: new SComponentProperty('y', 0),
-    ['width']: new SComponentProperty('width', 0),
-    ['height']: new SComponentProperty('height', 0),
-    ['positionConstraints']: new SComponentProperty('positionConstraints', JSON.stringify({})),
-    ['flexboxAlign']: new SComponentProperty(
-      'flexboxAlign',
-      JSON.stringify(
-        new SComponentFlexboxAlign(true, SComponentFlexboxAutoAlign.Start, SComponentFlexboxAlignDirection.Vertical)
-      )
-    ),
-  };
   protected readonly _onPropertyChange = new Subject<SComponentProperty>();
 
   private _isCurrentCompSelected = false;
@@ -52,6 +41,38 @@ export abstract class StlbBaseGComponent {
     [StlcResizerSide.Right]: new StlbResizer(StlcResizerSide.Right, this),
     [StlcResizerSide.Bottom]: new StlbResizer(StlcResizerSide.Bottom, this),
   };
+
+  private readonly _paddings: { [key in SComponentPaddingDirection]: SComponentPadding } = {
+    [SComponentPaddingDirection.Left]: new SComponentPadding(0, SComponentPaddingDirection.Left),
+    [SComponentPaddingDirection.Top]: new SComponentPadding(0, SComponentPaddingDirection.Top),
+    [SComponentPaddingDirection.Right]: new SComponentPadding(0, SComponentPaddingDirection.Right),
+    [SComponentPaddingDirection.Bottom]: new SComponentPadding(0, SComponentPaddingDirection.Bottom),
+  };
+
+  private readonly _properties: { [name: string]: SComponentProperty } = {
+    ['x']: new SComponentProperty('x', 0),
+    ['y']: new SComponentProperty('y', 0),
+    ['width']: new SComponentProperty('width', 0),
+    ['height']: new SComponentProperty('height', 0),
+    ['paddings']: new SComponentProperty('paddings', JSON.stringify(this._paddings)),
+    ['positionConstraints']: new SComponentProperty('positionConstraints', JSON.stringify({})),
+    ['flexboxAlign']: new SComponentProperty(
+      'flexboxAlign',
+      JSON.stringify(
+        new SComponentFlexboxAlign(true, SComponentFlexboxAutoAlign.Start, SComponentFlexboxAlignDirection.Vertical)
+      )
+    ),
+  };
+
+  public get padding() {
+    return { ...this._paddings };
+  }
+
+  public setPadding(value: number, direction: SComponentPaddingDirection) {
+    this._paddings[direction].value = value;
+
+    this.setProperty(new SComponentProperty<string>('paddings', JSON.stringify(this._paddings)));    
+  }
 
   public get positionConstraints(): { [key in SComponentPositionConstraintDirection]?: number } {
     return JSON.parse(<string>this._properties['positionConstraints'].value);
@@ -78,12 +99,18 @@ export abstract class StlbBaseGComponent {
   public get x(): number {
     return <number>this._properties['x'].value;
   }
+  public get innerX(): number {
+    return this.x + this._paddings[SComponentPaddingDirection.Left].value;
+  }
   public set x(v: number) {
     this.setProperty(new SComponentProperty<number>('x', v));
   }
 
   public get y(): number {
     return <number>this._properties['y'].value;
+  }
+  public get innerY(): number {
+    return this.y + this._paddings[SComponentPaddingDirection.Top].value;
   }
   public set y(v: number) {
     this.setProperty(new SComponentProperty<number>('y', v));
@@ -92,12 +119,26 @@ export abstract class StlbBaseGComponent {
   public get width(): number {
     return <number>this._properties['width'].value;
   }
+  public get innerWidth(): number {
+    return (
+      this.width -
+      this._paddings[SComponentPaddingDirection.Left].value -
+      this._paddings[SComponentPaddingDirection.Right].value
+    );
+  }
   public set width(v: number) {
     this.setProperty(new SComponentProperty<number>('width', v));
   }
 
   public get height(): number {
     return <number>this._properties['height'].value;
+  }
+  public get innerHeight(): number {
+    return (
+      this.height -
+      this._paddings[SComponentPaddingDirection.Top].value -
+      this._paddings[SComponentPaddingDirection.Bottom].value
+    );
   }
   public set height(v: number) {
     this.setProperty(new SComponentProperty<number>('height', v));
@@ -158,21 +199,22 @@ export abstract class StlbBaseGComponent {
     if (property.name === 'x') {
       this._container.position.x = (<SComponentProperty<number>>property).value;
 
-      this.drawGraphics();
+      this.redraw();
     } else if (property.name === 'y') {
       this._container.position.y = (<SComponentProperty<number>>property).value;
 
-      this.drawGraphics();
+      this.redraw();
     } else if (property.name === 'width') {
       this.graphics.width = (<SComponentProperty<number>>property).value;
 
       this.redraw();
     } else if (property.name === 'height') {
-      // this._container.height = (<SComponentProperty<number>>property).value;
       this.graphics.height = (<SComponentProperty<number>>property).value;
 
       this.redraw();
     } else if (property.name === 'flexboxAlign') {
+      this.redraw();
+    } else if (property.name === 'paddings') {
       this.redraw();
     }
 
@@ -267,7 +309,7 @@ export abstract class StlbBaseGComponent {
       },
     });
 
-    /// Width    
+    /// Width
     const widthInput = new Stlbinput('W');
     widthInput.container.position.x = currentX;
     widthInput.container.position.y = currentY;
@@ -283,7 +325,7 @@ export abstract class StlbBaseGComponent {
       },
     });
 
-    /// Height    
+    /// Height
     const heightInputG = new Stlbinput('H');
     heightInputG.container.position.x = currentX + padding;
     heightInputG.container.position.y = currentY;
@@ -369,19 +411,21 @@ export abstract class StlbBaseGComponent {
       height: child.height,
     }));
 
-    const newChildrenPosAndBounds = FlexboxAdapterUtil.applyAlign(
+    const applyResult = FlexboxAdapterUtil.applyAlign(
       childrenPosAndBounds,
-      { width: this.width, height: this.height },
+      { width: this.innerWidth, height: this.innerHeight },
       this.flexboxAlign.direction,
       <SComponentFlexboxAutoAlign>this.flexboxAlign.align
     );
 
+    // if (!applyResult.isApplied) return;
+
     for (let index = 0; index < this._childComps.length; index++) {
       const childComp = this._childComps[index];
-      const newChildPosAndBounds = newChildrenPosAndBounds[index];
-
-      childComp.x = newChildPosAndBounds.x;
-      childComp.y = newChildPosAndBounds.y;
+      const newChildPosAndBounds = applyResult.elPositionsAndBounds[index];
+      
+      childComp.x = this._paddings[SComponentPaddingDirection.Left].value + newChildPosAndBounds.x;
+      childComp.y = this._paddings[SComponentPaddingDirection.Top].value + newChildPosAndBounds.y;
     }
   }
 }

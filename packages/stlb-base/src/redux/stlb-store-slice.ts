@@ -37,6 +37,21 @@ export class SComponentFlexboxAlign {
 }
 // #endregion
 
+// #region Paddings
+
+export enum SComponentPaddingDirection {
+  Left,
+  Top,
+  Right,
+  Bottom,
+}
+
+export class SComponentPadding {
+  constructor(public value: number, public readonly direction: SComponentPaddingDirection) {}
+}
+
+// #endregion
+
 export enum SComponentConstraintDirection {
   Left,
   Top,
