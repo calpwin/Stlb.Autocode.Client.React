@@ -7,6 +7,7 @@ import {
   SComponentFlexboxAutoAlign,
   SComponentFlexboxFixAlign,
 } from '../redux/stlb-store-slice';
+import { Stlbinput } from '../gcomponent/stlb-input';
 
 export class FlexboxAdapterUtil {
   public readonly testContainer = new Container();
@@ -14,7 +15,6 @@ export class FlexboxAdapterUtil {
 
   public readonly onAlignChanged = new Subject<SComponentFlexboxAlign>();
 
-  
   public get propertyEditorWidth() {
     return this.propertyEditorContainer.getBounds().width;
   }
@@ -22,7 +22,6 @@ export class FlexboxAdapterUtil {
   public get propertyEditorHeight() {
     return 80;
   }
-  
 
   private readonly _testElsBounds = [
     {
@@ -47,7 +46,7 @@ export class FlexboxAdapterUtil {
   }
 
   private readonly _propEditorWidth = 150;
-  private readonly _propEditorHeight = 80;
+  private readonly _propEditorHeight = 100;
   private readonly _propEditorPadding = 20;
   private readonly _propEditorCellGapHorizontal = (this._propEditorWidth - this._propEditorPadding * 2) / 2;
   private readonly _propEditorCellGapVertical = (this._propEditorHeight - this._propEditorPadding * 2) / 2;
@@ -593,7 +592,7 @@ export class FlexboxAdapterUtil {
     const btnBounds = { width: 35, height: 25 };
     const paddings = 10;
 
-    // Button auto or fix align direction
+    // Button Auto or Fix Align direction
     const btnAutoOrFixAlignG = new Graphics().rect(0, 0, btnBounds.width, btnBounds.height).fill(0xefeeee);
     btnAutoOrFixAlignG.eventMode = 'static';
     btnAutoOrFixAlignG.hitArea = new Circle(btnBounds.width / 2, btnBounds.height / 2, btnBounds.height / 2);
@@ -621,6 +620,23 @@ export class FlexboxAdapterUtil {
     if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
       btnAutoOrFixAlignG.addChild(btnAutoOrFixAlignTextG);
       this.propertyEditorContainer.addChild(btnAutoOrFixAlignG);
+    }
+
+    // Input Fix Align direction
+    const inputFixAlignDirection = new Stlbinput('F', 50);
+    inputFixAlignDirection.inputText = this.flexboxAlign.alignFixComponentsGap.toFixed(0);
+    const inputFixAlignDirectionG = inputFixAlignDirection.render();
+    inputFixAlignDirectionG.x = 0;
+    inputFixAlignDirectionG.y = (btnBounds.height + paddings) * 2;
+    inputFixAlignDirection.onChanged.subscribe((value) => {
+      this.onAlignChanged.next({
+        ...this.flexboxAlign,
+        alignFixComponentsGap: parseInt(value),
+      });
+    });
+
+    if (this.flexboxAlign.alignType === SComponentAlignType.Fix) {
+      this.propertyEditorContainer.addChild(inputFixAlignDirectionG);
     }
 
     // Button Horizontal direction
@@ -731,8 +747,7 @@ export class FlexboxAdapterUtil {
     bgContainer.position.x = 120;
     bgContainer.position.y = 0;
     const propEditorWidth = 150;
-    const propEditorHeight = 80;
-    const propEditoBgG = new Graphics().rect(0, 0, propEditorWidth, propEditorHeight).fill(0xefeeee);
+    const propEditoBgG = new Graphics().rect(0, 0, propEditorWidth, this._propEditorHeight).fill(0xefeeee);
 
     if (this.flexboxAlign.alignType !== SComponentAlignType.Absolute) {
       bgContainer.addChild(propEditoBgG);
@@ -800,9 +815,7 @@ export class FlexboxAdapterUtil {
     if (this.flexboxAlign.alignType === SComponentAlignType.Auto)
       nextCellAlign = FlexboxAdapterUtil._autoAlignDirectionByCellAlign(cellAlign, this.flexboxAlign.direction);
 
-    this.onAlignChanged.next(
-      new SComponentFlexboxAlign(this.flexboxAlign.alignType, nextCellAlign, this.flexboxAlign.direction)
-    );
+    this.onAlignChanged.next({ ...this.flexboxAlign, align: nextCellAlign });
   }
 
   redrawTest() {

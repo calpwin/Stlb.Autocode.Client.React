@@ -5,9 +5,13 @@ import { debounce } from 'ts-debounce';
 export class StlbGComponentMovier {
   private _isActive = false;
 
+  public get isActive() {
+    return this._isActive;
+  }
+
   constructor(private readonly _gcomp: StlbBaseGComponent) {}
 
-  public enable() {    
+  public enable() {
     this._gcomp._container.on('mousedown', this._onMouseDown);
   }
 

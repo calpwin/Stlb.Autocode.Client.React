@@ -37,8 +37,9 @@ export enum SComponentAlignType {
 export class SComponentFlexboxAlign {
   constructor(
     public alignType: SComponentAlignType,     
-    public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,
-    public direction: SComponentFlexboxAlignDirection
+    public align: SComponentFlexboxAutoAlign | SComponentFlexboxFixAlign,    
+    public direction: SComponentFlexboxAlignDirection,
+    public alignFixComponentsGap: number = 0
   ) {}
 }
 // #endregion

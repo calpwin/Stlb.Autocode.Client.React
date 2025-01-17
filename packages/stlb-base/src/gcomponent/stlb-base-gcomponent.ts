@@ -89,6 +89,13 @@ export abstract class StlbBaseGComponent {
     this.setProperty(new SComponentProperty<string>('positionConstraints', JSON.stringify(v)));
   }
 
+  public get isMovable(): boolean {
+    return this._componentMovier.isActive;
+  }
+  public set isMovable(value: boolean) {
+    value ? this._componentMovier.enable() : this._componentMovier.disable();
+  }
+
   public get flexboxAlign(): SComponentFlexboxAlign {
     return JSON.parse(<string>this._properties['flexboxAlign'].value);
   }
@@ -96,9 +103,9 @@ export abstract class StlbBaseGComponent {
     this.setProperty(new SComponentProperty<string>('flexboxAlign', JSON.stringify(v)));
 
     if (v.alignType === SComponentAlignType.Absolute) {
-      this._componentMovier.enable();
+      this._childComps.forEach(c => c.isMovable = true);
     } else {
-      this._componentMovier.disable();
+      this._childComps.forEach(c => c.isMovable = false);
     }
   }
 

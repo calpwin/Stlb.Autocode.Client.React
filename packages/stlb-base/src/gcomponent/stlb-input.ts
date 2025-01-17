@@ -14,7 +14,7 @@ export class Stlbinput {
     return this._height;
   }
 
-  private readonly _inputWidth = 100;
+  private _inputWidth = 100;
   private readonly _nameWidth = 25;
   private readonly _height = 20;
 
@@ -30,7 +30,8 @@ export class Stlbinput {
   private _isActive = false;
   private _textG: Text = new Text({ style: { fill: 'black', fontSize: 12 } });
 
-  constructor(private readonly _name: string) {
+  constructor(private readonly _name: string, width?: number) {
+    this._inputWidth = width ?? this._inputWidth;
     this._bindKeyvoardEvents();
   }
 
