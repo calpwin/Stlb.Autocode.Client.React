@@ -26,17 +26,15 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   public readonly container = new Container();
 
   protected _inputWidth = 100;
-  protected readonly _nameWidth = 25;
+  protected readonly _nameWidth: number;
   protected readonly _height = 20;
 
   protected _isActive = false;
 
-  constructor(
-    protected readonly _name: string,
-    protected readonly valueType: SComponentPropertyType,
-    width?: number,
-  ) {
+  constructor(protected readonly _name: string, protected readonly valueType: SComponentPropertyType, width?: number) {
     this._inputWidth = width ?? this._inputWidth;
+
+    this._nameWidth = _name.length <= 2 ? 20 : 35;
 
     this._bindKeyvoardEvents();
   }

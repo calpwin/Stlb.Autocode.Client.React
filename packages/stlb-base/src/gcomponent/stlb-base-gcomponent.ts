@@ -28,11 +28,14 @@ import {
   SComponentNumberSystemProperty,
   SComponentJsonSystemProperty,
 } from '../redux/stlb-properties';
+import { StlbTextInput } from './input/stlb-text-input';
+import { StlbBaseinput } from './input/stlb-base-input';
+import { StlbBooleanInput } from './input/stlb-boolean-input';
 
 export abstract class StlbBaseGComponent {
   public readonly id!: string;
   public readonly _container: Container = new Container();
-  public readonly propertyContainer: Container = new Container();
+  public readonly propertyEditorContainer: Container = new Container();
   public readonly graphics: Graphics = new Graphics().rect(0, 0, 20, 20).fill('white');
 
   // Will set via GComponentList
@@ -220,7 +223,7 @@ export abstract class StlbBaseGComponent {
     });
   }
 
-  setProperty(property: SComponentProperty<string | number>) {
+  setProperty(property: SComponentProperty<string | number | boolean>) {
     this._properties[property.name] = property;
 
     if (property.name === 'x') {
@@ -301,23 +304,31 @@ export abstract class StlbBaseGComponent {
     this._container.addChild(container);
   }
 
+  // #region Properties
+  private _propertyEditorCurrentX = 0;
+  private _propertyEditorCurrentY = 0;
+  private _propertyEditorPaddings = 10;
+
   redrawProperty() {
-    this.propertyContainer.removeChildren();
+    this.propertyEditorContainer.removeChildren();
 
-    const propGrapchics: Container[] = [];
+    this.drawSystemProperty();
+    this.drawCustomProperty();
+  }
 
-    const padding = 10;
+  drawSystemProperty() {
+    const propGrapchics: Container[] = [];    
 
-    let currentX = padding;
-    let currentY = padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY = this._propertyEditorPaddings;
 
     /// X
     const xInput = new StlbNumberInput('X');
-    xInput.container.position.x = currentX;
-    xInput.container.position.y = currentY;
+    xInput.container.position.x = this._propertyEditorCurrentX;
+    xInput.container.position.y = this._propertyEditorCurrentY;
     xInput.inputText = this.x.toFixed(0);
 
-    currentX += xInput.width;
+    this._propertyEditorCurrentX += xInput.width;
 
     propGrapchics.push(xInput.render());
 
@@ -329,12 +340,12 @@ export abstract class StlbBaseGComponent {
 
     /// Y
     const yInput = new StlbNumberInput('Y');
-    yInput.container.position.x = currentX + padding;
-    yInput.container.position.y = currentY;
+    yInput.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
+    yInput.container.position.y = this._propertyEditorCurrentY;
     yInput.inputText = this.y.toFixed(0);
 
-    currentX = padding;
-    currentY += 20 + padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
 
     propGrapchics.push(yInput.render());
 
@@ -346,11 +357,11 @@ export abstract class StlbBaseGComponent {
 
     /// Width
     const widthInput = new StlbNumberInput('W');
-    widthInput.container.position.x = currentX;
-    widthInput.container.position.y = currentY;
+    widthInput.container.position.x = this._propertyEditorCurrentX;
+    widthInput.container.position.y = this._propertyEditorCurrentY;
     widthInput.inputText = this.width.toFixed(0);
 
-    currentX += widthInput.width;
+    this._propertyEditorCurrentX += widthInput.width;
 
     propGrapchics.push(widthInput.render());
 
@@ -362,12 +373,12 @@ export abstract class StlbBaseGComponent {
 
     /// Height
     const heightInputG = new StlbNumberInput('H');
-    heightInputG.container.position.x = currentX + padding;
-    heightInputG.container.position.y = currentY;
+    heightInputG.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
+    heightInputG.container.position.y = this._propertyEditorCurrentY;
     heightInputG.inputText = this.height.toFixed(0);
 
-    currentX = padding;
-    currentY += 20 + padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
 
     propGrapchics.push(heightInputG.render());
 
@@ -379,8 +390,8 @@ export abstract class StlbBaseGComponent {
 
     // Paddings
     const paddingstLeftRightInputG = new StlbNumberInput('PL');
-    paddingstLeftRightInputG.container.position.x = currentX;
-    paddingstLeftRightInputG.container.position.y = currentY;
+    paddingstLeftRightInputG.container.position.x = this._propertyEditorCurrentX;
+    paddingstLeftRightInputG.container.position.y = this._propertyEditorCurrentY;
     paddingstLeftRightInputG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
     paddingstLeftRightInputG.onChanged.subscribe({
       next: (value) => {
@@ -390,11 +401,11 @@ export abstract class StlbBaseGComponent {
       },
     });
 
-    currentX += paddingstLeftRightInputG.width + padding;
+    this._propertyEditorCurrentX += paddingstLeftRightInputG.width + this._propertyEditorPaddings;
 
     const paddingstTopBottomInputG = new StlbNumberInput('PT');
-    paddingstTopBottomInputG.container.position.x = currentX;
-    paddingstTopBottomInputG.container.position.y = currentY;
+    paddingstTopBottomInputG.container.position.x = this._propertyEditorCurrentX;
+    paddingstTopBottomInputG.container.position.y = this._propertyEditorCurrentY;
     paddingstTopBottomInputG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
     paddingstTopBottomInputG.onChanged.subscribe({
       next: (value) => {
@@ -404,51 +415,83 @@ export abstract class StlbBaseGComponent {
       },
     });
 
-    currentX = padding;
-    currentY += paddingstLeftRightInputG.height * 2 + padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY += paddingstLeftRightInputG.height * 2 + this._propertyEditorPaddings;
 
     propGrapchics.push(paddingstLeftRightInputG.render());
     propGrapchics.push(paddingstTopBottomInputG.render());
+
 
     // GComponent Constraints
     const constraintsG = new GComponentPositionConstraint(
       Object.keys(this.positionConstraints).map((c) => <SComponentPositionConstraintDirection>+c)
     );
-    constraintsG.container.position.x = currentX;
-    constraintsG.container.position.y = currentY;
+    constraintsG.container.position.x = this._propertyEditorCurrentX;
+    constraintsG.container.position.y = this._propertyEditorCurrentY;
     constraintsG.redraw();
     constraintsG.onConstraintChanged.subscribe((constraints) => {
       const constraintsValues = GComponentPositionConstraint.getCurrentPositionConstraintsValues(constraints, this);
       this.positionConstraints = constraintsValues;
     });
 
-    currentX = padding;
-    currentY += constraintsG.height + padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY += constraintsG.height + this._propertyEditorPaddings;
 
     propGrapchics.push(constraintsG.container);
 
     // Flexbox adapter property
     const flexboxAdapter = new FlexboxAdapterUtil(this.flexboxAlign);
     const flexboxAdapterG = flexboxAdapter.redrawPropertyEditor();
-    flexboxAdapterG.position.x = currentX;
-    flexboxAdapterG.position.y = currentY;
+    flexboxAdapterG.position.x = this._propertyEditorCurrentX;
+    flexboxAdapterG.position.y = this._propertyEditorCurrentY;
     flexboxAdapter.onAlignChanged.subscribe((newAlign) => {
       this.flexboxAlign = newAlign;
     });
 
     propGrapchics.push(flexboxAdapterG);
+    propGrapchics.push(flexboxAdapterG);
 
-    currentX = padding;
-    currentY += flexboxAdapter.propertyEditorHeight + padding;
+    this._propertyEditorCurrentX = this._propertyEditorPaddings;
+    this._propertyEditorCurrentY += flexboxAdapter.propertyEditorHeight + this._propertyEditorPaddings;
 
     // Add all prop graphics
-    this.propertyContainer.addChild(
-      new Graphics().rect(0, 0, this.propertyContainer.getBounds().rectangle.width, currentY).fill('white')
+    this.propertyEditorContainer.addChild(
+      new Graphics().rect(0, 0, this.propertyEditorContainer.getBounds().rectangle.width, this._propertyEditorCurrentY).fill('white')
     );
     propGrapchics.forEach((propG) => {
-      this.propertyContainer.addChild(propG);
+      this.propertyEditorContainer.addChild(propG);
     });
   }
+
+  drawCustomProperty() {
+    this.getProperties([SComponentPropertyAttribute.Custom]).forEach((prop) => {
+      let xInput: StlbBaseinput<any>;
+      if (prop.type === SComponentPropertyType.String) {
+        xInput = new StlbTextInput(prop.name);
+        xInput.inputText = <string>prop.value;
+      } else if (prop.type === SComponentPropertyType.Number) {
+        xInput = new StlbNumberInput(prop.name);
+        xInput.inputText = (<number>prop.value).toFixed(0);
+      } else if (prop.type === SComponentPropertyType.Boolean) {
+        xInput = new StlbBooleanInput(prop.name);
+        xInput.inputText = <string>prop.value;
+      } else {
+        throw new Error(`Custom property is not support ${prop.type}`);
+      }
+
+      // const xInput = new StlbTextInput(prop.name);
+      xInput.container.position.x = this._propertyEditorCurrentX;
+      xInput.container.position.y = this._propertyEditorCurrentY;      
+      
+
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += xInput.height + this._propertyEditorPaddings;
+
+      this.propertyEditorContainer.addChild(xInput.render());
+    });
+  }
+
+  // #endregion
 
   private _updateChildrenConstraintPosition() {
     if (this._childComps.length === 0) return;

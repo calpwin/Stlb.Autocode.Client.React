@@ -1,4 +1,5 @@
 import { StlbBaseGComponent } from '@stlb-autocode/stlb-base';
+import { SComponentBooleanCustomProperty, SComponentNumberCustomProperty, SComponentStringCustomProperty } from 'packages/stlb-base/src/redux/stlb-properties';
 import { Color, Container, Graphics } from 'pixi.js';
 
 export class StlbRectangleGComponent extends StlbBaseGComponent {
@@ -11,6 +12,10 @@ export class StlbRectangleGComponent extends StlbBaseGComponent {
     this.height = 100;
     this.x = 100;
     this.y = 100    
+
+    this.setProperty(new SComponentNumberCustomProperty('Cus', 123));
+    this.setProperty(new SComponentStringCustomProperty('Nam', 'John'));
+    this.setProperty(new SComponentBooleanCustomProperty('Flag', true));
   }
 
   renderTo(parent: Container) {

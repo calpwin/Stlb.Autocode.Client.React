@@ -20,7 +20,7 @@ export class FlexboxAdapterUtil {
   }
 
   public get propertyEditorHeight() {
-    return 80;
+    return 110;
   }
 
   private readonly _testElsBounds = [

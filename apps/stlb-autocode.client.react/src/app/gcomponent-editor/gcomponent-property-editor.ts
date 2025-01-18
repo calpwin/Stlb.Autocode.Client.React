@@ -39,11 +39,9 @@ export class GComponentPropertyEditor {
 
         this._selectedGComp.redrawProperty();
         container.removeChildren();
-        container.addChild(this._selectedGComp.propertyContainer);
+        container.addChild(this._selectedGComp.propertyEditorContainer);
 
-        currentY = this._selectedGComp.propertyContainer.getBounds().rectangle.height;
-
-        container.addChild(new Graphics().rect(0, currentY, 70, 40).fill('red'));        
+        currentY = this._selectedGComp.propertyEditorContainer.getBounds().rectangle.height;        
       })
     );
 

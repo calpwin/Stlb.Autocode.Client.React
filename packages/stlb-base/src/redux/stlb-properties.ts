@@ -10,7 +10,7 @@ export enum SComponentPropertyAttribute {
   Custom,
 }
 
-export class SComponentProperty<T = string | number> {
+export class SComponentProperty<T = string | number | boolean> {
   constructor(
     public readonly name: string,
     public value: T,
@@ -18,6 +18,8 @@ export class SComponentProperty<T = string | number> {
     public readonly attributes: SComponentPropertyAttribute[] = []
   ) {}
 }
+
+// #region System properties
 
 export class SComponentNumberSystemProperty extends SComponentProperty<number> {
   constructor(name: string, value: number) {
@@ -32,7 +34,31 @@ export class SComponentStringSystemProperty extends SComponentProperty<string> {
 }
 
 export class SComponentJsonSystemProperty extends SComponentProperty<string> {
-    constructor(name: string, value: string) {
-      super(name, value, SComponentPropertyType.Json, [SComponentPropertyAttribute.System]);
+  constructor(name: string, value: string) {
+    super(name, value, SComponentPropertyType.Json, [SComponentPropertyAttribute.System]);
+  }
+}
+
+// #endregion
+
+// #region Custom properties
+
+export class SComponentNumberCustomProperty extends SComponentProperty<number> {
+  constructor(name: string, value: number) {
+    super(name, value, SComponentPropertyType.Number, [SComponentPropertyAttribute.Custom]);
+  }
+}
+
+export class SComponentStringCustomProperty extends SComponentProperty<string> {
+  constructor(name: string, value: string) {
+    super(name, value, SComponentPropertyType.String, [SComponentPropertyAttribute.Custom]);
+  }
+}
+
+export class SComponentBooleanCustomProperty extends SComponentProperty<boolean> {
+    constructor(name: string, value: boolean) {
+      super(name, value, SComponentPropertyType.String, [SComponentPropertyAttribute.Custom]);
     }
   }
+
+// #endregion
