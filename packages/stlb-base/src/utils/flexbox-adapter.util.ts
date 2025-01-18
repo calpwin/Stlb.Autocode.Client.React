@@ -7,7 +7,7 @@ import {
   SComponentFlexboxAutoAlign,
   SComponentFlexboxFixAlign,
 } from '../redux/stlb-store-slice';
-import { StlbNumberInput } from '../gcomponent/input/stlb-text-input';
+import { StlbNumberInput } from '../gcomponent/input/stlb-number-input';
 
 export class FlexboxAdapterUtil {
   public readonly testContainer = new Container();

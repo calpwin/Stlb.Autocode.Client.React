@@ -1,14 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-export enum SComponentPropertyType {
-  String,
-  Number,
-  Boolean,
-}
-
-export class SComponentProperty<T = string | number> {
-  constructor(public readonly name: string, public value: T, public readonly type = SComponentPropertyType.String) {}
-}
+import { SComponentProperty } from './stlb-properties';
 
 // #region Flexbox align
 export enum SComponentFlexboxAlignDirection {

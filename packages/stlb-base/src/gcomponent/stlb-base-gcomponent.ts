@@ -10,7 +10,6 @@ import {
   SComponentPadding,
   SComponentPaddingDirection,
   SComponentConstraintDirection as SComponentPositionConstraintDirection,
-  SComponentProperty,
   selectComponent,
   setComponentSettings as setComponentProperty,
   unselectComponent,
@@ -18,10 +17,17 @@ import {
 import { Guid } from 'guid-typescript';
 import { Subject } from 'rxjs';
 import { StlbResizer, StlcResizerSide } from './resizer';
-import { StlbNumberInput } from './input/stlb-text-input';
+import { StlbNumberInput } from './input/stlb-number-input';
 import { StlbGlobals } from '../globals';
 import { FlexboxAdapterUtil } from '../utils/flexbox-adapter.util';
 import { StlbGComponentMovier } from './stlb-gcomponent-movier';
+import {
+  SComponentProperty,
+  SComponentPropertyType,
+  SComponentPropertyAttribute,
+  SComponentNumberSystemProperty,
+  SComponentJsonSystemProperty,
+} from '../redux/stlb-properties';
 
 export abstract class StlbBaseGComponent {
   public readonly id!: string;
@@ -54,13 +60,13 @@ export abstract class StlbBaseGComponent {
   };
 
   private readonly _properties: { [name: string]: SComponentProperty } = {
-    ['x']: new SComponentProperty('x', 0),
-    ['y']: new SComponentProperty('y', 0),
-    ['width']: new SComponentProperty('width', 0),
-    ['height']: new SComponentProperty('height', 0),
-    ['paddings']: new SComponentProperty('paddings', JSON.stringify(this._paddings)),
-    ['positionConstraints']: new SComponentProperty('positionConstraints', JSON.stringify({})),
-    ['flexboxAlign']: new SComponentProperty(
+    ['x']: new SComponentNumberSystemProperty('x', 0),
+    ['y']: new SComponentNumberSystemProperty('y', 0),
+    ['width']: new SComponentNumberSystemProperty('width', 0),
+    ['height']: new SComponentNumberSystemProperty('height', 0),
+    ['paddings']: new SComponentJsonSystemProperty('paddings', JSON.stringify(this._paddings)),
+    ['positionConstraints']: new SComponentJsonSystemProperty('positionConstraints', JSON.stringify({})),
+    ['flexboxAlign']: new SComponentJsonSystemProperty(
       'flexboxAlign',
       JSON.stringify(
         new SComponentFlexboxAlign(
@@ -79,14 +85,14 @@ export abstract class StlbBaseGComponent {
   public setPadding(value: number, direction: SComponentPaddingDirection) {
     this._paddings[direction].value = value;
 
-    this.setProperty(new SComponentProperty<string>('paddings', JSON.stringify(this._paddings)));
+    this.setProperty(new SComponentJsonSystemProperty('paddings', JSON.stringify(this._paddings)));
   }
 
   public get positionConstraints(): { [key in SComponentPositionConstraintDirection]?: number } {
     return JSON.parse(<string>this._properties['positionConstraints'].value);
   }
   public set positionConstraints(v: { [key in SComponentPositionConstraintDirection]?: number }) {
-    this.setProperty(new SComponentProperty<string>('positionConstraints', JSON.stringify(v)));
+    this.setProperty(new SComponentJsonSystemProperty('positionConstraints', JSON.stringify(v)));
   }
 
   public get isMovable(): boolean {
@@ -100,12 +106,12 @@ export abstract class StlbBaseGComponent {
     return JSON.parse(<string>this._properties['flexboxAlign'].value);
   }
   public set flexboxAlign(v: SComponentFlexboxAlign) {
-    this.setProperty(new SComponentProperty<string>('flexboxAlign', JSON.stringify(v)));
+    this.setProperty(new SComponentJsonSystemProperty('flexboxAlign', JSON.stringify(v)));
 
     if (v.alignType === SComponentAlignType.Absolute) {
-      this._childComps.forEach(c => c.isMovable = true);
+      this._childComps.forEach((c) => (c.isMovable = true));
     } else {
-      this._childComps.forEach(c => c.isMovable = false);
+      this._childComps.forEach((c) => (c.isMovable = false));
     }
   }
 
@@ -124,7 +130,7 @@ export abstract class StlbBaseGComponent {
     return this.x + this._paddings[SComponentPaddingDirection.Left].value;
   }
   public set x(v: number) {
-    this.setProperty(new SComponentProperty<number>('x', v));
+    this.setProperty(new SComponentNumberSystemProperty('x', v));
   }
 
   public get y(): number {
@@ -134,7 +140,7 @@ export abstract class StlbBaseGComponent {
     return this.y + this._paddings[SComponentPaddingDirection.Top].value;
   }
   public set y(v: number) {
-    this.setProperty(new SComponentProperty<number>('y', v));
+    this.setProperty(new SComponentNumberSystemProperty('y', v));
   }
 
   public get width(): number {
@@ -148,7 +154,7 @@ export abstract class StlbBaseGComponent {
     );
   }
   public set width(v: number) {
-    this.setProperty(new SComponentProperty<number>('width', v));
+    this.setProperty(new SComponentNumberSystemProperty('width', v));
   }
 
   public get height(): number {
@@ -162,7 +168,7 @@ export abstract class StlbBaseGComponent {
     );
   }
   public set height(v: number) {
-    this.setProperty(new SComponentProperty<number>('height', v));
+    this.setProperty(new SComponentNumberSystemProperty('height', v));
   }
 
   public get isSelected(): boolean {
@@ -218,19 +224,19 @@ export abstract class StlbBaseGComponent {
     this._properties[property.name] = property;
 
     if (property.name === 'x') {
-      this._container.position.x = (<SComponentProperty<number>>property).value;
+      this._container.position.x = (<SComponentNumberSystemProperty>property).value;
 
       this.redraw();
     } else if (property.name === 'y') {
-      this._container.position.y = (<SComponentProperty<number>>property).value;
+      this._container.position.y = (<SComponentNumberSystemProperty>property).value;
 
       this.redraw();
     } else if (property.name === 'width') {
-      this.graphics.width = (<SComponentProperty<number>>property).value;
+      this.graphics.width = (<SComponentNumberSystemProperty>property).value;
 
       this.redraw();
     } else if (property.name === 'height') {
-      this.graphics.height = (<SComponentProperty<number>>property).value;
+      this.graphics.height = (<SComponentNumberSystemProperty>property).value;
 
       this.redraw();
     } else if (property.name === 'flexboxAlign') {
@@ -248,6 +254,14 @@ export abstract class StlbBaseGComponent {
 
   getProperty<T = string | number>(name: string) {
     return <SComponentProperty<T>>this._properties[name];
+  }
+
+  getProperties(onlyWithAttributes?: SComponentPropertyAttribute[]) {
+    let props = Object.keys(this._properties).map((key) => this._properties[key]);
+
+    if (!onlyWithAttributes || onlyWithAttributes.length === 0) return props;
+
+    return props.filter((p) => p.attributes.some((x) => onlyWithAttributes.some((y) => y === x)));
   }
 
   renderTo(parent: Container) {}

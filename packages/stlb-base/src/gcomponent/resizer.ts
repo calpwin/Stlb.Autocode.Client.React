@@ -1,13 +1,8 @@
-import {
-  Circle,
-  FederatedEvent,
-  FederatedPointerEvent,
-  Graphics,
-} from 'pixi.js';
+import { Circle, FederatedPointerEvent, Graphics } from 'pixi.js';
 import { StlbBaseGComponent } from './stlb-base-gcomponent';
 import { StlbGlobals } from '../globals';
 import { debounce } from 'ts-debounce';
-import { SComponentPropertyType } from '../redux/stlb-store-slice';
+import { SComponentNumberSystemProperty, SComponentPropertyType } from '../redux/stlb-properties';
 
 export enum StlcResizerSide {
   Left,
@@ -27,58 +22,45 @@ export class StlbResizer {
   private _startWidth?: number;
   private _startHeight?: number;
 
-  constructor(
-    public readonly side: StlcResizerSide,
-    private readonly _parentGComp: StlbBaseGComponent
-  ) {
+  constructor(public readonly side: StlcResizerSide, private readonly _parentGComp: StlbBaseGComponent) {
     this._bindEvents();
   }
 
   render() {
     this._resizerG.zIndex = 1000;
 
-    if (this.side === StlcResizerSide.Left)
-      this._resizerG = this._renderLeftResizer();
-    else if (this.side === StlcResizerSide.Top)
-      this._resizerG = this._renderTopResizer();
-    else if (this.side === StlcResizerSide.Right)
-      this._resizerG = this._renderRightResizer();
-    else if (this.side === StlcResizerSide.Bottom)
-      this._resizerG = this._renderBottomResizer();
+    if (this.side === StlcResizerSide.Left) this._resizerG = this._renderLeftResizer();
+    else if (this.side === StlcResizerSide.Top) this._resizerG = this._renderTopResizer();
+    else if (this.side === StlcResizerSide.Right) this._resizerG = this._renderRightResizer();
+    else if (this.side === StlcResizerSide.Bottom) this._resizerG = this._renderBottomResizer();
 
     return this._resizerG;
   }
 
   _renderLeftResizer() {
     this._resizerG.position.x = 0;
-    this._resizerG.position.y =
-      this._parentGComp.getProperty<number>('height').value / 2;
+    this._resizerG.position.y = this._parentGComp.getProperty<number>('height').value / 2;
 
     return this._resizerG;
   }
 
   _renderTopResizer() {
-    this._resizerG.position.x =
-      this._parentGComp.getProperty<number>('width').value / 2;
+    this._resizerG.position.x = this._parentGComp.getProperty<number>('width').value / 2;
     this._resizerG.position.y = 0;
 
     return this._resizerG;
   }
 
   _renderRightResizer() {
-    this._resizerG.position.x =
-      this._parentGComp.getProperty<number>('width').value;
-    this._resizerG.position.y =
-      this._parentGComp.getProperty<number>('height').value / 2;
+    this._resizerG.position.x = this._parentGComp.getProperty<number>('width').value;
+    this._resizerG.position.y = this._parentGComp.getProperty<number>('height').value / 2;
 
     return this._resizerG;
   }
 
   _renderBottomResizer() {
-    this._resizerG.position.x =
-      this._parentGComp.getProperty<number>('width').value / 2;
-    this._resizerG.position.y =
-      this._parentGComp.getProperty<number>('height').value;
+    this._resizerG.position.x = this._parentGComp.getProperty<number>('width').value / 2;
+    this._resizerG.position.y = this._parentGComp.getProperty<number>('height').value;
 
     return this._resizerG;
   }
@@ -103,7 +85,7 @@ export class StlbResizer {
         max = Math.floor(max);
 
         return Math.floor(Math.random() * (max - min + 1)) + min;
-      };      
+      };
 
       StlbGlobals.app.stage.on('mousemove', this._onMouseMove);
     });
@@ -122,36 +104,21 @@ export class StlbResizer {
     const xDelta = this._startPointerXPosition! - e.client.x;
 
     if (this.side === StlcResizerSide.Left) {
-      this._parentGComp.setProperty({
-        name: 'x',
-        value: this._startXPosition! - xDelta,
-        type: SComponentPropertyType.Number
-      });
-      this._parentGComp.setProperty({
-        name: 'width',
-        value: this._startWidth! + xDelta,
-        type: SComponentPropertyType.Number
-      });
+      this._parentGComp.setProperty(new SComponentNumberSystemProperty('x', this._startXPosition! - xDelta));
+      this._parentGComp.setProperty(new SComponentNumberSystemProperty('width', this._startWidth! + xDelta));
     } else if (this.side === StlcResizerSide.Top) {
-      this._parentGComp.setProperty({ name: 'y', value: e.client.y, type: SComponentPropertyType.Number });
-      this._parentGComp.setProperty({
-        name: 'height',
-        value: this._startHeight! + (this._startPointerYPosition! - e.client.y),
-        type: SComponentPropertyType.Number
-      });
+      this._parentGComp.setProperty(new SComponentNumberSystemProperty('y', e.client.y));
+      this._parentGComp.setProperty(
+        new SComponentNumberSystemProperty('height', this._startHeight! + (this._startPointerYPosition! - e.client.y))
+      );
     } else if (this.side === StlcResizerSide.Right) {
-      // this._parentGComp.setProperty({ name: 'x', value: e.client.x });
-      this._parentGComp.setProperty({
-        name: 'width',
-        value: this._startWidth! + (e.client.x - this._startPointerXPosition!),
-        type: SComponentPropertyType.Number
-      });
+      this._parentGComp.setProperty(
+        new SComponentNumberSystemProperty('width', this._startWidth! + (e.client.x - this._startPointerXPosition!))
+      );
     } else if (this.side === StlcResizerSide.Bottom) {
-      this._parentGComp.setProperty({
-        name: 'height',
-        value: this._startHeight! + (e.client.y - this._startPointerYPosition!),
-        type: SComponentPropertyType.Number
-      });
+      this._parentGComp.setProperty(
+        new SComponentNumberSystemProperty('height', this._startHeight! + (e.client.y - this._startPointerYPosition!))
+      );
     }
   }
 }

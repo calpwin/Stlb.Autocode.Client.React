@@ -1,7 +1,7 @@
 import { Container, Graphics, FederatedMouseEvent, Rectangle, Text } from 'pixi.js';
 import { Subject } from 'rxjs';
 import { StlbGlobals } from '../../globals';
-import { SComponentPropertyType } from '../../redux/stlb-store-slice';
+import { SComponentPropertyType } from '../../redux/stlb-properties';
 
 export abstract class StlbBaseinput<Type extends string | number | boolean> {
   private _inputValue: string = '';
@@ -33,8 +33,8 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   constructor(
     protected readonly _name: string,
+    protected readonly valueType: SComponentPropertyType,
     width?: number,
-    protected readonly valueType = SComponentPropertyType.String
   ) {
     this._inputWidth = width ?? this._inputWidth;
 
