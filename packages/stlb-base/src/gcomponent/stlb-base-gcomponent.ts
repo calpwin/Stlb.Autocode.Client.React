@@ -18,7 +18,7 @@ import {
 import { Guid } from 'guid-typescript';
 import { Subject } from 'rxjs';
 import { StlbResizer, StlcResizerSide } from './resizer';
-import { StlbTextInput } from './stlb-input';
+import { StlbNumberInput } from './input/stlb-text-input';
 import { StlbGlobals } from '../globals';
 import { FlexboxAdapterUtil } from '../utils/flexbox-adapter.util';
 import { StlbGComponentMovier } from './stlb-gcomponent-movier';
@@ -298,7 +298,7 @@ export abstract class StlbBaseGComponent {
     let currentY = padding;
 
     /// X
-    const xInput = new StlbTextInput('X');
+    const xInput = new StlbNumberInput('X');
     xInput.container.position.x = currentX;
     xInput.container.position.y = currentY;
     xInput.inputText = this.x.toFixed(0);
@@ -309,12 +309,12 @@ export abstract class StlbBaseGComponent {
 
     xInput.onChanged.subscribe({
       next: (value) => {
-        this.x = parseInt(value);
+        this.x = value;
       },
     });
 
     /// Y
-    const yInput = new StlbTextInput('Y');
+    const yInput = new StlbNumberInput('Y');
     yInput.container.position.x = currentX + padding;
     yInput.container.position.y = currentY;
     yInput.inputText = this.y.toFixed(0);
@@ -326,12 +326,12 @@ export abstract class StlbBaseGComponent {
 
     yInput.onChanged.subscribe({
       next: (value) => {
-        this.y = parseInt(value);
+        this.y = value;
       },
     });
 
     /// Width
-    const widthInput = new StlbTextInput('W');
+    const widthInput = new StlbNumberInput('W');
     widthInput.container.position.x = currentX;
     widthInput.container.position.y = currentY;
     widthInput.inputText = this.width.toFixed(0);
@@ -342,12 +342,12 @@ export abstract class StlbBaseGComponent {
 
     widthInput.onChanged.subscribe({
       next: (value) => {
-        this.width = parseInt(value);
+        this.width = value;
       },
     });
 
     /// Height
-    const heightInputG = new StlbTextInput('H');
+    const heightInputG = new StlbNumberInput('H');
     heightInputG.container.position.x = currentX + padding;
     heightInputG.container.position.y = currentY;
     heightInputG.inputText = this.height.toFixed(0);
@@ -359,18 +359,18 @@ export abstract class StlbBaseGComponent {
 
     heightInputG.onChanged.subscribe({
       next: (value) => {
-        this.height = parseInt(value);
+        this.height = value;
       },
     });
 
     // Paddings
-    const paddingstLeftRightInputG = new StlbTextInput('PL');
+    const paddingstLeftRightInputG = new StlbNumberInput('PL');
     paddingstLeftRightInputG.container.position.x = currentX;
     paddingstLeftRightInputG.container.position.y = currentY;
     paddingstLeftRightInputG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
     paddingstLeftRightInputG.onChanged.subscribe({
       next: (value) => {
-        const paddingValue = parseInt(value);
+        const paddingValue = value;
         this.setPadding(paddingValue, SComponentPaddingDirection.Left);
         this.setPadding(paddingValue, SComponentPaddingDirection.Right);
       },
@@ -378,13 +378,13 @@ export abstract class StlbBaseGComponent {
 
     currentX += paddingstLeftRightInputG.width + padding;
 
-    const paddingstTopBottomInputG = new StlbTextInput('PT');
+    const paddingstTopBottomInputG = new StlbNumberInput('PT');
     paddingstTopBottomInputG.container.position.x = currentX;
     paddingstTopBottomInputG.container.position.y = currentY;
     paddingstTopBottomInputG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
     paddingstTopBottomInputG.onChanged.subscribe({
       next: (value) => {
-        const paddingValue = parseInt(value);
+        const paddingValue = value;
         this.setPadding(paddingValue, SComponentPaddingDirection.Top);
         this.setPadding(paddingValue, SComponentPaddingDirection.Bottom);
       },

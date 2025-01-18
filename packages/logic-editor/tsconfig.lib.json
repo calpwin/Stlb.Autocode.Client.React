@@ -19,5 +19,5 @@
     "**/*.spec.jsx",
     "**/*.test.jsx"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "../stlb-base/src/gcomponent/stlb-input.ts"]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "../stlb-base/src/gcomponent/input/stlb-text-input.ts"]
 }
