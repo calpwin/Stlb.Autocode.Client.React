@@ -31,6 +31,7 @@ import {
 import { StlbTextInput } from './input/stlb-text-input';
 import { StlbBaseinput } from './input/stlb-base-input';
 import { StlbBooleanInput } from './input/stlb-boolean-input';
+import { StlbColorPickerInput } from './input/stlb-colorpicker-input';
 
 export abstract class StlbBaseGComponent {
   public readonly id!: string;
@@ -317,7 +318,7 @@ export abstract class StlbBaseGComponent {
   }
 
   drawSystemProperty() {
-    const propGrapchics: Container[] = [];    
+    const propGrapchics: Container[] = [];
 
     this._propertyEditorCurrentX = this._propertyEditorPaddings;
     this._propertyEditorCurrentY = this._propertyEditorPaddings;
@@ -421,7 +422,6 @@ export abstract class StlbBaseGComponent {
     propGrapchics.push(paddingstLeftRightInputG.render());
     propGrapchics.push(paddingstTopBottomInputG.render());
 
-
     // GComponent Constraints
     const constraintsG = new GComponentPositionConstraint(
       Object.keys(this.positionConstraints).map((c) => <SComponentPositionConstraintDirection>+c)
@@ -456,7 +456,9 @@ export abstract class StlbBaseGComponent {
 
     // Add all prop graphics
     this.propertyEditorContainer.addChild(
-      new Graphics().rect(0, 0, this.propertyEditorContainer.getBounds().rectangle.width, this._propertyEditorCurrentY).fill('white')
+      new Graphics()
+        .rect(0, 0, this.propertyEditorContainer.getBounds().rectangle.width, this._propertyEditorCurrentY)
+        .fill('white')
     );
     propGrapchics.forEach((propG) => {
       this.propertyEditorContainer.addChild(propG);
@@ -475,14 +477,16 @@ export abstract class StlbBaseGComponent {
       } else if (prop.type === SComponentPropertyType.Boolean) {
         xInput = new StlbBooleanInput(prop.name);
         xInput.inputText = <string>prop.value;
+      } else if (prop.type === SComponentPropertyType.Color) {
+        xInput = new StlbColorPickerInput(prop.name);
+        xInput.inputText = <string>prop.value;
       } else {
         throw new Error(`Custom property is not support ${prop.type}`);
       }
 
       // const xInput = new StlbTextInput(prop.name);
       xInput.container.position.x = this._propertyEditorCurrentX;
-      xInput.container.position.y = this._propertyEditorCurrentY;      
-      
+      xInput.container.position.y = this._propertyEditorCurrentY;
 
       this._propertyEditorCurrentX = this._propertyEditorPaddings;
       this._propertyEditorCurrentY += xInput.height + this._propertyEditorPaddings;

@@ -3,6 +3,7 @@ export enum SComponentPropertyType {
   Number,
   Boolean,
   Json,
+  Color
 }
 
 export enum SComponentPropertyAttribute {
@@ -56,8 +57,14 @@ export class SComponentStringCustomProperty extends SComponentProperty<string> {
 }
 
 export class SComponentBooleanCustomProperty extends SComponentProperty<boolean> {
-    constructor(name: string, value: boolean) {
-      super(name, value, SComponentPropertyType.String, [SComponentPropertyAttribute.Custom]);
+  constructor(name: string, value: boolean) {
+    super(name, value, SComponentPropertyType.String, [SComponentPropertyAttribute.Custom]);
+  }
+}
+
+export class SComponentColorCustomProperty extends SComponentProperty<number> {
+    constructor(name: string, value: number) {
+      super(name, value, SComponentPropertyType.Color, [SComponentPropertyAttribute.Custom]);
     }
   }
 

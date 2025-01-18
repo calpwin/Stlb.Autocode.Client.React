@@ -1,9 +1,16 @@
 import { StlbBaseGComponent } from '@stlb-autocode/stlb-base';
-import { SComponentBooleanCustomProperty, SComponentNumberCustomProperty, SComponentStringCustomProperty } from 'packages/stlb-base/src/redux/stlb-properties';
+import {
+  SComponentBooleanCustomProperty,
+  SComponentColorCustomProperty,
+  SComponentNumberCustomProperty,
+  SComponentStringCustomProperty,
+} from 'packages/stlb-base/src/redux/stlb-properties';
 import { Color, Container, Graphics } from 'pixi.js';
 
 export class StlbRectangleGComponent extends StlbBaseGComponent {
-  private readonly _rectangleG = new Graphics().rect(0, 0, 100, 200).fill('#'+(0x1033000+Math.random()*0xffeeff).toString(16).substr(1,6));
+  private readonly _rectangleG = new Graphics()
+    .rect(0, 0, 100, 200)
+    .fill('#' + (0x1033000 + Math.random() * 0xffeeff).toString(16).substr(1, 6));
 
   constructor(parentCompId: string) {
     super(parentCompId);
@@ -11,15 +18,16 @@ export class StlbRectangleGComponent extends StlbBaseGComponent {
     this.width = 200;
     this.height = 100;
     this.x = 100;
-    this.y = 100    
+    this.y = 100;
 
     this.setProperty(new SComponentNumberCustomProperty('Cus', 123));
     this.setProperty(new SComponentStringCustomProperty('Nam', 'John'));
     this.setProperty(new SComponentBooleanCustomProperty('Flag', true));
+    this.setProperty(new SComponentColorCustomProperty('Color', 0xeefdee));
   }
 
   renderTo(parent: Container) {
-    super.renderTo(parent);    
+    super.renderTo(parent);
 
     this.drawGraphics();
 
@@ -30,7 +38,7 @@ export class StlbRectangleGComponent extends StlbBaseGComponent {
 
   drawGraphics(): void {
     super.drawGraphics();
-    
+
     this._rectangleG.width = this.width;
     this._rectangleG.height = this.height;
     this._container.addChild(this._rectangleG);

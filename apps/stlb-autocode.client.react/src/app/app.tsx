@@ -6,7 +6,7 @@ import styles from './app.module.less';
 import {LogicEditor} from '@stlb-autocode/logic-editor';
 import {StlbGlobals, StlbStore} from '@stlb-autocode/stlb-base';
 
-import { Application, Sprite, Assets, Text } from 'pixi.js';
+import { Application, Sprite, Assets, Text, setPositions } from 'pixi.js';
 import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
 import { TextWord } from './text-word';
 import { TextProcessor } from './text-processor';
@@ -36,7 +36,9 @@ class App extends Component {
         <div id="text-editor-wrapper" style={{ width: '100%', height: '100%' }}>
           {/* <AutocodeBlock text={this.state.text} /> */}
         </div>
-      </div>
+
+        <div id='stlb-colorpicker' style={{position: 'relative', display: 'block', width: 200, height: 200}}></div>
+      </div>      
     );
   }
 

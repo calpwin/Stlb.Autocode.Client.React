@@ -127,7 +127,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   // #endregion Name
 
-  drawInputValue() {
+  drawInputValue(): Container {
     this._inputValueTextG.text = this.inputText;
     this._inputValueTextG.position.x = this._nameWidth + 5;
     this._inputValueTextG.position.y = 2;
