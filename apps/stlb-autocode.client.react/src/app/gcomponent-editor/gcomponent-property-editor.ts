@@ -1,4 +1,4 @@
-import { StlbBaseGComponent, StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
+import { StlbBaseGComponent, StlbDbEditor, StlbGlobals, StlbIoc, StlbStore } from '@stlb-autocode/stlb-base';
 import { Container, Graphics, Text } from 'pixi.js';
 import watch from 'redux-watch';
 import { StlbTextGComponent } from '../gcomponents/stlb-text-gcomponent';
@@ -49,7 +49,7 @@ export class GComponentPropertyEditor {
 
     // Db to Comp property button
     const dbToCompPropBtnG = new Text({
-      text: this._isDbPropertyEnabled ? 'To DB property' : 'To Component property',
+      text: this._isDbPropertyEnabled ? 'To Component property' : 'To DB property',
       style: { fontSize: 14 },
     });
     dbToCompPropBtnG.position.x = padding;
@@ -61,7 +61,7 @@ export class GComponentPropertyEditor {
     });
     this._container.addChild(dbToCompPropBtnG);
 
-    let currentX = 0;
+    let currentX = padding;
     let currentY = dbToCompPropBtnG.getBounds().height + padding;
 
     // Component property
@@ -77,6 +77,19 @@ export class GComponentPropertyEditor {
           this.redrawCompProperties(this._selectedGComp, compPropertyContainer, currentX, currentY);
       })
     );
+
+    // Database property
+    if (this._isDbPropertyEnabled) {
+      const dbEditor = new StlbDbEditor();
+      const dbContainer = dbEditor.redraw();
+      dbContainer.position.x = currentX;
+      dbContainer.position.y = currentY + padding;
+
+      this._container.addChild(dbContainer);
+
+      currentX = padding;
+      currentY += dbContainer.getBounds().height;
+    }
 
     if (!this._isDbPropertyEnabled && this._selectedGComp)
       this.redrawCompProperties(this._selectedGComp, compPropertyContainer, currentX, currentY);

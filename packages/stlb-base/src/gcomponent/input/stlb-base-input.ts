@@ -28,6 +28,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   protected _inputWidth = 100;
   protected readonly _nameWidth: number;
   protected readonly _height = 20;
+  private readonly _padding = 5;
 
   protected _isActive = false;
 
@@ -67,8 +68,8 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   drawButtomLineG() {
     const buttomLineG = new Graphics()
-      .moveTo(0, this._height)
-      .lineTo(this._nameWidth + this._inputWidth, this._height)
+      .moveTo(this._nameWidth + this._padding, this._height)
+      .lineTo(this._inputWidth, this._height)
       .stroke('black');
 
     return buttomLineG;
@@ -129,10 +130,10 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   drawInputValue(): Container {
     this._inputValueTextG.text = this.inputText;
-    this._inputValueTextG.position.x = this._nameWidth + 5;
+    this._inputValueTextG.position.x = this._nameWidth + this._padding;
     this._inputValueTextG.position.y = 2;
     this._inputValueTextG.eventMode = 'static';
-    this._inputValueTextG.hitArea = new Rectangle(this._nameWidth, 0, this._nameWidth + this._inputWidth, this._height);
+    this._inputValueTextG.hitArea = new Rectangle(0, 0, this._inputWidth, this._height);
     this._inputValueTextG.on('click', () => {
       this._isActive = true;
     });
@@ -146,7 +147,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
       if (event.code === 'Escape') {
         this._isActive = false;
-
+        
         this.onChanged.next(this._valueToTypeValue());
       } else if (event.code === 'Backspace') {
         this._inputValue = this._inputValueString.substring(0, this._inputValueString.length - 1);
@@ -154,7 +155,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
         this._inputValue += event.key;
       }
 
-      this._inputValueTextG.text = this._inputValue;
+      this.inputText = this._inputValue;
 
       event.preventDefault();
     });
