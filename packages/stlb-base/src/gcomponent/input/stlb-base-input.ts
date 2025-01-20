@@ -26,7 +26,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   public readonly container = new Container();
 
   protected _inputWidth = 100;
-  protected readonly _nameWidth: number;
+  protected readonly _nameWidth: number = 0;
   protected readonly _height = 20;
   private readonly _padding = 5;
 
@@ -35,7 +35,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   constructor(protected readonly _name: string, protected readonly valueType: SComponentPropertyType, width?: number) {
     this._inputWidth = width ?? this._inputWidth;
 
-    this._nameWidth = _name.length <= 2 ? 20 : 35;
+    if (_name) this._nameWidth = _name.length <= 2 ? 20 : 35;
 
     this._bindKeyvoardEvents();
   }
@@ -57,8 +57,10 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
     const buttomLineG = this.drawButtomLineG();
     this.container.addChild(buttomLineG);
 
-    const nameG = this.drawNameG();
-    this.container.addChild(nameG);
+    if (this._name) {
+      const nameG = this.drawNameG();
+      this.container.addChild(nameG);
+    }
 
     const inputValueG = this.drawInputValue();
     this.container.addChild(inputValueG);
@@ -147,7 +149,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
       if (event.code === 'Escape') {
         this._isActive = false;
-        
+
         this.onChanged.next(this._valueToTypeValue());
       } else if (event.code === 'Backspace') {
         this._inputValue = this._inputValueString.substring(0, this._inputValueString.length - 1);
