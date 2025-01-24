@@ -1,6 +1,79 @@
-import { Container, curveEps, parseDDS, Text } from 'pixi.js';
+import { Container, Text } from 'pixi.js';
 import { StlbTextInput } from '../gcomponent/input/stlb-text-input';
-import { __values } from 'tslib';
+import { injectable } from 'inversify';
+
+export enum StlbDbType {
+  String,
+  Number,
+}
+
+export class StlbDbColumnValue<Type extends string | number> {
+  constructor(public value: Type, public rowId: number = 0) {}
+}
+
+export class StlbDbColumn<Type extends string | number> {
+  private readonly _values: StlbDbColumnValue<Type>[] = [];
+
+  public get values() {
+    return [...this._values];
+  }
+
+  addValue(value: StlbDbColumnValue<Type>) {
+    this._values.push(value);
+  }
+
+  constructor(public readonly name: string, public readonly toTableName: string, public readonly type: StlbDbType) {}
+}
+
+@injectable()
+export class StlbDbStore {
+  private _store: { [columnName: string]: StlbDbColumn<any> } = {};
+
+  getValues(columnName: string) {
+    return this._store[columnName].values;
+  }
+
+  addColumn(column: StlbDbColumn<any>) {
+    this._store[column.name] = column;
+  }
+
+  getColumns() {
+    return Object.keys(this._store);
+  }
+
+  async addValue(columnName: string, value: StlbDbColumnValue<any>): Promise<number> {
+    if (!this._store[columnName]) return 0;
+
+    const column = this._store[columnName];
+    column.addValue(value);
+
+    var rowId = await fetch('http://localhost:5149/add-column', {
+      method: 'post',
+      body: JSON.stringify({
+        rowId: value.rowId ? value.rowId : undefined,
+        columnName: column.name,
+        tableName: column.toTableName,
+        value: value.value,
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+    })
+      .then((response) => response.text())
+      .then((responseJson) => {
+        const entityRowId = parseInt(responseJson);
+        value.rowId = entityRowId;
+
+        return entityRowId;
+      });
+
+    return rowId;
+  }
+
+  removeAll() {
+    this._store = {};
+  }
+}
 
 export class StlbDbEditor {
   private readonly _container = new Container();
@@ -8,10 +81,19 @@ export class StlbDbEditor {
   private readonly _padding = 10;
   private _isTypeEditorActive = false;
 
-  private readonly _values: { [type: string]: string[] } = {
-    ['Name']: ['Andrey', 'John'],
-    ['Surname']: ['Gilly', 'Peterg'],
-  };
+  private _dbStore = new StlbDbStore();
+
+  constructor() {
+    this._dbStore.addColumn(new StlbDbColumn('Name', 'Person', StlbDbType.String));
+    this._dbStore.addColumn(new StlbDbColumn('SurName', 'Person', StlbDbType.String));
+
+    this._dbStore.addValue('Name', new StlbDbColumnValue('Andrei')).then((rowId) => {
+      this._dbStore.addValue('SurName', new StlbDbColumnValue('Yello', rowId));
+    });
+    // this._dbStore.addValue('Name', new StlbDbColumnValue('John')).then((rowId) => {
+    //   this._dbStore.addValue('SurName', new StlbDbColumnValue('Samith', rowId));
+    // });
+  }
 
   redraw() {
     this._container.removeChildren();
@@ -22,7 +104,7 @@ export class StlbDbEditor {
     const actionBtnsContainer = new Container();
 
     if (this._isTypeEditorActive) {
-      const valueEditor = this._drawValueEditor(['Name', 'Surname']);
+      const valueEditor = this._drawValueEditor(this._dbStore.getColumns());
       valueEditor.position.x = currentX;
       valueEditor.position.y = currentY;
       this._container.addChild(valueEditor);
@@ -86,7 +168,7 @@ export class StlbDbEditor {
       typeName.position.x = currentX;
       typeName.position.y = currentY;
 
-      currentX += typeNameColumnWidth + this._padding*2;
+      currentX += typeNameColumnWidth + this._padding * 2;
 
       container.addChild(typeName);
     });
@@ -94,11 +176,11 @@ export class StlbDbEditor {
     currentX = 0;
     currentY = columnHeight;
 
-    types.forEach((valueKey) => {
+    types.forEach((columnName) => {
       currentY = 30;
-      this._values[valueKey].forEach((value) => {
+      this._dbStore.getValues(columnName).forEach((dbValue) => {
         const newValueG = this._drawNewValueFields(typeNameColumnWidth);
-        newValueG.inputText = value;
+        newValueG.inputText = dbValue.value;
         newValueG.render();
         newValueG.container.position.x = currentX;
         newValueG.container.position.y = currentY;
@@ -108,7 +190,7 @@ export class StlbDbEditor {
         currentY += columnHeight;
       });
 
-      currentX += typeNameColumnWidth + this._padding*2;
+      currentX += typeNameColumnWidth + this._padding * 2;
     });
 
     currentX = 0;
@@ -118,8 +200,9 @@ export class StlbDbEditor {
     newValueBtnG.position.y = currentY;
     newValueBtnG.eventMode = 'static';
     newValueBtnG.on('click', () => {
-      this._values['Name'].push('');
-      this._values['Surname'].push('');
+      this._dbStore.addValue('Name', new StlbDbColumnValue('')).then((rowId) => {
+        this._dbStore.addValue('SurName', new StlbDbColumnValue('', rowId));
+      });
 
       this.redraw();
     });

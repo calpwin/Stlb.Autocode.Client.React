@@ -20,5 +20,5 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.jsx"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "../../packages/logic-editor/src/lib/text-socket.ts", "../../packages/stlb-base/src/gcomponent/gcomponent-list.ts", "../../packages/stlb-base/src/gcomponent/stlb-base-gcomponent.ts"]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx", "../../packages/logic-editor/src/lib/text-socket.ts", "../../packages/stlb-base/src/gcomponent/gcomponent-list.ts", "../../packages/stlb-base/src/gcomponent/stlb-base-gcomponent.ts", "../../packages/stlb-base/src/gcomponent/input-parser/text-float-box.gcomponent.ts", "../../packages/stlb-base/src/gcomponent/input-parser/text-word.ts"]
 }

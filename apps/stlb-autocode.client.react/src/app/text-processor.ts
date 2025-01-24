@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
+import { TextFloatBoxGComponent } from '../../../../packages/stlb-base/src/gcomponent/input-parser/text-float-box.gcomponent';
 import {
   ClientRenderMessage,
   EventMessage,
@@ -8,7 +8,7 @@ import {
   SelectVariantMessage,
   TextSocket,
 } from '@stlb-autocode/logic-editor';
-import { TextWord } from './text-word';
+import { TextWord } from '../../../../packages/stlb-base/src/gcomponent/input-parser/text-word';
 import { Application, Text } from 'pixi.js';
 
 export class TextProcessor {

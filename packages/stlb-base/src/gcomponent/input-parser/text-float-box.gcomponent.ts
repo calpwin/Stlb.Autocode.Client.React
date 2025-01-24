@@ -33,11 +33,11 @@ export class TextFloatBoxGComponent {
   constructor(
     public readonly x: number,
     public readonly y: number,
-    readonly w: number,
+    width: number,
     public readonly word: TextWord,
     public readonly wordsToChoose: TextWord[]
   ) {
-    this.width = w > 100 ? w : 100;
+    this.width = width > 100 ? width : 100;
 
     document.addEventListener('keydown', this.onKeyDown);
   }

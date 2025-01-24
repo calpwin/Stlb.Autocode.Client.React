@@ -7,8 +7,8 @@ import {LogicEditor} from '@stlb-autocode/logic-editor';
 import {StlbGlobals, StlbStore} from '@stlb-autocode/stlb-base';
 
 import { Application, Sprite, Assets, Text, setPositions } from 'pixi.js';
-import { TextFloatBoxGComponent } from './text-float-box.gcomponent';
-import { TextWord } from './text-word';
+import { TextFloatBoxGComponent } from '../../../../packages/stlb-base/src/gcomponent/input-parser/text-float-box.gcomponent';
+import { TextWord } from '../../../../packages/stlb-base/src/gcomponent/input-parser/text-word';
 import { TextProcessor } from './text-processor';
 import { AutocodeBlock } from './feature.autocode-block/autocodeblock';
 import { ClientComponent, ComponentArgument } from './feature.autocode-block/component-argument';

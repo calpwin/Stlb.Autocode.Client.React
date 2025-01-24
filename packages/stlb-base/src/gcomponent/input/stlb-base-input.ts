@@ -32,12 +32,17 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   protected _isActive = false;
 
+  private _cursorG: Graphics;
+  private _cursoTimer!: NodeJS.Timer;
+
   constructor(protected readonly _name: string, protected readonly valueType: SComponentPropertyType, width?: number) {
     this._inputWidth = width ?? this._inputWidth;
 
     if (_name) this._nameWidth = _name.length <= 2 ? 20 : 35;
 
-    this._bindKeyvoardEvents();
+    this._cursorG = this._drawCursorG();
+
+    this._bindKeyboardEvents();
   }
 
   public get width() {
@@ -64,6 +69,8 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
     const inputValueG = this.drawInputValue();
     this.container.addChild(inputValueG);
+
+    this.container.addChild(this._cursorG);
 
     return this.container;
   }
@@ -128,7 +135,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
     e.preventDefault();
   }
 
-  // #endregion Name
+  // #endregion
 
   drawInputValue(): Container {
     this._inputValueTextG.text = this.inputText;
@@ -138,23 +145,64 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
     this._inputValueTextG.hitArea = new Rectangle(0, 0, this._inputWidth, this._height);
     this._inputValueTextG.on('click', () => {
       this._isActive = true;
+      this._enableCursor();
     });
 
     return this._inputValueTextG;
   }
 
-  protected _bindKeyvoardEvents() {
+  // #region Cursor
+
+  private _drawCursorG() {
+    const cursor = new Graphics()
+      .moveTo(this._nameWidth + this._padding, 0)
+      .lineTo(this._nameWidth + this._padding, this._height)
+      .stroke({ width: 2, color: 'black' });
+
+    cursor.visible = false;
+
+    return cursor;
+  }
+
+  private _enableCursor() {
+    if (!this._cursorG) return;
+
+    this._cursoTimer = setInterval(() => {
+      this._cursorG.visible = !this._cursorG.visible;
+    }, 450);
+  }
+
+  private _disableCursor() {
+    this._cursorG.visible = false;
+    clearInterval(this._cursoTimer);
+  }
+
+  private _moveCursor(nextPosXMove: -1 | 1) {
+    const posScale = 7;
+    const newPos = this._cursorG.position.x + nextPosXMove * posScale;
+
+    if (newPos >= 0 && newPos <= this._inputValueString.length * posScale) this._cursorG.position.x = newPos;
+  }
+
+  // #endregion
+
+  protected _bindKeyboardEvents() {
     window.addEventListener('keydown', (event: KeyboardEvent) => {
       if (!this._isActive) return;
 
       if (event.code === 'Escape') {
         this._isActive = false;
+        this._disableCursor();
 
         this.onChanged.next(this._valueToTypeValue());
       } else if (event.code === 'Backspace') {
         this._inputValue = this._inputValueString.substring(0, this._inputValueString.length - 1);
       } else if (event.key.length === 1 && event.key.match(/[a-zA-Z0-9\.\s]/)) {
         this._inputValue += event.key;
+      } else if (event.key === 'ArrowLeft') {
+        this._moveCursor(-1);
+      } else if (event.key === 'ArrowRight') {
+        this._moveCursor(1);
       }
 
       this.inputText = this._inputValue;
