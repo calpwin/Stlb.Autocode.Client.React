@@ -2,6 +2,7 @@ import { Container, Graphics, FederatedMouseEvent, Rectangle, Text } from 'pixi.
 import { Subject } from 'rxjs';
 import { StlbGlobals } from '../../globals';
 import { SComponentPropertyType } from '../../redux/stlb-properties';
+import { Input } from '@pixi/ui';
 
 export abstract class StlbBaseinput<Type extends string | number | boolean> {
   private _inputValue: string = '';
@@ -13,7 +14,8 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   public set inputText(v: string) {
     this._inputValue = v;
     this._inputValueString = v.toString();
-    this._inputValueTextG.text = this._inputValueString;
+    // this._inputValueG.value = this._inputValueString;
+    // this._inputValueTextG.text = this._inputValueString;
   }
 
   public get value(): Type {
@@ -21,6 +23,9 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   }
 
   protected _inputValueTextG: Text = new Text({ style: { fill: 'black', fontSize: 12 } });
+
+  protected _inputSetup = false;
+  protected _inputValueG = new Input({ bg: new Graphics() });
 
   public readonly onChanged = new Subject<Type>();
   public readonly container = new Container();
@@ -32,17 +37,13 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
 
   protected _isActive = false;
 
-  private _cursorG: Graphics;
+  private _cursorG!: Graphics;
   private _cursoTimer!: NodeJS.Timer;
 
   constructor(protected readonly _name: string, protected readonly valueType: SComponentPropertyType, width?: number) {
     this._inputWidth = width ?? this._inputWidth;
 
-    if (_name) this._nameWidth = _name.length <= 2 ? 20 : 35;
-
-    this._cursorG = this._drawCursorG();
-
-    this._bindKeyboardEvents();
+    if (_name) this._nameWidth = _name.length <= 2 ? 20 : 35;    
   }
 
   public get width() {
@@ -67,10 +68,13 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
       this.container.addChild(nameG);
     }
 
-    const inputValueG = this.drawInputValue();
-    this.container.addChild(inputValueG);
+    if (!this._inputSetup) {
+      this._inputValueG = <Input>this.drawInputValue();
+      this._inputSetup = true;
+    }
+    this.container.addChild(this._inputValueG);
 
-    this.container.addChild(this._cursorG);
+    // this.container.addChild(this._cursorG);
 
     return this.container;
   }
@@ -127,9 +131,9 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   private _changeValueByMouse(e: FederatedMouseEvent) {
     if (!this._isMouseValueChangeActive) return;
 
-    const value = parseInt(this._inputValueTextG.text);
+    const value = parseInt(this._inputValueG.value);
     this.inputText = (value + e.movementX).toFixed(0);
-    this._inputValueTextG.text = this.inputText;
+    this._inputValueG.value = this.inputText;
 
     e.stopImmediatePropagation();
     e.preventDefault();
@@ -138,18 +142,41 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   // #endregion
 
   drawInputValue(): Container {
-    this._inputValueTextG.text = this.inputText;
-    this._inputValueTextG.position.x = this._nameWidth + this._padding;
-    this._inputValueTextG.position.y = 2;
-    this._inputValueTextG.eventMode = 'static';
-    this._inputValueTextG.hitArea = new Rectangle(0, 0, this._inputWidth, this._height);
-    this._inputValueTextG.on('click', () => {
-      this._isActive = true;
-      this._enableCursor();
+    const inputG = new Input({
+      bg: new Graphics().rect(0, 0, this._inputWidth - this._nameWidth - this._padding, this._height).fill('white'),
+      textStyle: {
+        fill: 'black',
+        fontSize: 13,
+      },
+      maxLength: 20,
+      addMask: true,
+      value: this._inputValueG.value,
+    });
+    inputG.position.x = this._nameWidth + this._padding;
+    inputG.onChange.connect((val) => {
+      this.inputText = val;
+    });
+    inputG.onEnter.connect((val) => {
+      this.inputText = val;
+      this.onChanged.next(this._valueToTypeValue());
     });
 
-    return this._inputValueTextG;
+    return inputG;
   }
+
+  // drawInputValue(): Container {
+  //   this._inputValueTextG.text = this.inputText;
+  //   this._inputValueTextG.position.x = this._nameWidth + this._padding;
+  //   this._inputValueTextG.position.y = 2;
+  //   this._inputValueTextG.eventMode = 'static';
+  //   this._inputValueTextG.hitArea = new Rectangle(0, 0, this._inputWidth, this._height);
+  //   this._inputValueTextG.on('click', () => {
+  //     this._isActive = true;
+  //     this._enableCursor();
+  //   });
+
+  //   return this._inputValueTextG;
+  // }
 
   // #region Cursor
 

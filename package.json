@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@pixi/ui": "^2.2.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@types/redux-watch": "^1.1.2",
     "guid-typescript": "^1.0.9",
