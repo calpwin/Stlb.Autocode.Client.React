@@ -317,6 +317,13 @@ export abstract class StlbBaseGComponent {
     this.drawCustomProperty();
   }
 
+  private _inputXG?: StlbBaseinput<number>;
+  private _inputYG?: StlbBaseinput<number>;
+  private _inputWidthG?: StlbBaseinput<number>;
+  private _inputHeightG?: StlbBaseinput<number>;
+  private _inputPaddingLeftRightG?: StlbBaseinput<number>;
+  private _inputPaddingRightBottomG?: StlbBaseinput<number>;
+
   drawSystemProperty() {
     const propGrapchics: Container[] = [];
 
@@ -324,103 +331,155 @@ export abstract class StlbBaseGComponent {
     this._propertyEditorCurrentY = this._propertyEditorPaddings;
 
     /// X
-    const xInput = new StlbNumberInput('X');
-    xInput.container.position.x = this._propertyEditorCurrentX;
-    xInput.container.position.y = this._propertyEditorCurrentY;
-    xInput.inputText = this.x.toFixed(0);
+    if (!this._inputXG) {
+      const xInput = new StlbNumberInput('X');
+      xInput.container.position.x = this._propertyEditorCurrentX;
+      xInput.container.position.y = this._propertyEditorCurrentY;
+      xInput.inputText = this.x.toFixed(0);
 
-    this._propertyEditorCurrentX += xInput.width;
+      this._propertyEditorCurrentX += xInput.width;
 
-    propGrapchics.push(xInput.render());
+      propGrapchics.push(xInput.render());
 
-    xInput.onChanged.subscribe({
-      next: (value) => {
-        this.x = value;
-      },
-    });
+      xInput.onChanged.subscribe({
+        next: (value) => {
+          this.x = value;
+        },
+      });
+
+      this._inputXG = xInput;
+    } else {
+      this._inputXG.inputText = this.x.toFixed(0);
+      propGrapchics.push(this._inputXG.container);
+
+      this._propertyEditorCurrentX += this._inputXG.width;
+    }
 
     /// Y
-    const yInput = new StlbNumberInput('Y');
-    yInput.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
-    yInput.container.position.y = this._propertyEditorCurrentY;
-    yInput.inputText = this.y.toFixed(0);
+    if (!this._inputYG) {
+      const yInput = new StlbNumberInput('Y');
+      yInput.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
+      yInput.container.position.y = this._propertyEditorCurrentY;
+      yInput.inputText = this.y.toFixed(0);
 
-    this._propertyEditorCurrentX = this._propertyEditorPaddings;
-    this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
 
-    propGrapchics.push(yInput.render());
+      propGrapchics.push(yInput.render());
 
-    yInput.onChanged.subscribe({
-      next: (value) => {
-        this.y = value;
-      },
-    });
+      yInput.onChanged.subscribe({
+        next: (value) => {
+          this.y = value;
+        },
+      });
+
+      this._inputYG = yInput;
+    } else {
+      this._inputYG.inputText = this.y.toFixed(0);
+      propGrapchics.push(this._inputYG.container);
+
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
+    }
 
     /// Width
-    const widthInput = new StlbNumberInput('W');
-    widthInput.container.position.x = this._propertyEditorCurrentX;
-    widthInput.container.position.y = this._propertyEditorCurrentY;
-    widthInput.inputText = this.width.toFixed(0);
+    if (!this._inputWidthG) {
+      const widthInput = new StlbNumberInput('W');
+      widthInput.container.position.x = this._propertyEditorCurrentX;
+      widthInput.container.position.y = this._propertyEditorCurrentY;
+      widthInput.inputText = this.width.toFixed(0);
 
-    this._propertyEditorCurrentX += widthInput.width;
+      this._propertyEditorCurrentX += widthInput.width;
 
-    propGrapchics.push(widthInput.render());
+      propGrapchics.push(widthInput.render());
 
-    widthInput.onChanged.subscribe({
-      next: (value) => {
-        this.width = value;
-      },
-    });
+      widthInput.onChanged.subscribe({
+        next: (value) => {
+          this.width = value;
+        },
+      });
+
+      this._inputWidthG = widthInput;
+    } else {
+      this._inputWidthG.inputText = this.width.toFixed(0);
+      propGrapchics.push(this._inputWidthG.container);
+
+      this._propertyEditorCurrentX += this._inputWidthG.width;
+    }
 
     /// Height
-    const heightInputG = new StlbNumberInput('H');
-    heightInputG.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
-    heightInputG.container.position.y = this._propertyEditorCurrentY;
-    heightInputG.inputText = this.height.toFixed(0);
+    if (!this._inputHeightG) {
+      const heightInputG = new StlbNumberInput('H');
+      heightInputG.container.position.x = this._propertyEditorCurrentX + this._propertyEditorPaddings;
+      heightInputG.container.position.y = this._propertyEditorCurrentY;
+      heightInputG.inputText = this.height.toFixed(0);
 
-    this._propertyEditorCurrentX = this._propertyEditorPaddings;
-    this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
 
-    propGrapchics.push(heightInputG.render());
+      propGrapchics.push(heightInputG.render());
 
-    heightInputG.onChanged.subscribe({
-      next: (value) => {
-        this.height = value;
-      },
-    });
+      heightInputG.onChanged.subscribe({
+        next: (value) => {
+          this.height = value;
+        },
+      });
+
+      this._inputHeightG = heightInputG;
+    } else {
+      this._inputHeightG.inputText = this.height.toFixed(0);
+      propGrapchics.push(this._inputHeightG.container);
+
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += 20 + this._propertyEditorPaddings;
+    }
 
     // Paddings
-    const paddingstLeftRightInputG = new StlbNumberInput('PL');
-    paddingstLeftRightInputG.container.position.x = this._propertyEditorCurrentX;
-    paddingstLeftRightInputG.container.position.y = this._propertyEditorCurrentY;
-    paddingstLeftRightInputG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
-    paddingstLeftRightInputG.onChanged.subscribe({
-      next: (value) => {
-        const paddingValue = value;
-        this.setPadding(paddingValue, SComponentPaddingDirection.Left);
-        this.setPadding(paddingValue, SComponentPaddingDirection.Right);
-      },
-    });
+    if (!this._inputPaddingLeftRightG || !this._inputPaddingRightBottomG) {
+      const paddingstLeftRightInputG = new StlbNumberInput('PL');
+      paddingstLeftRightInputG.container.position.x = this._propertyEditorCurrentX;
+      paddingstLeftRightInputG.container.position.y = this._propertyEditorCurrentY;
+      paddingstLeftRightInputG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
+      paddingstLeftRightInputG.onChanged.subscribe({
+        next: (value) => {
+          const paddingValue = value;
+          this.setPadding(paddingValue, SComponentPaddingDirection.Left);
+          this.setPadding(paddingValue, SComponentPaddingDirection.Right);
+        },
+      });
 
-    this._propertyEditorCurrentX += paddingstLeftRightInputG.width + this._propertyEditorPaddings;
+      this._propertyEditorCurrentX += paddingstLeftRightInputG.width + this._propertyEditorPaddings;
 
-    const paddingstTopBottomInputG = new StlbNumberInput('PT');
-    paddingstTopBottomInputG.container.position.x = this._propertyEditorCurrentX;
-    paddingstTopBottomInputG.container.position.y = this._propertyEditorCurrentY;
-    paddingstTopBottomInputG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
-    paddingstTopBottomInputG.onChanged.subscribe({
-      next: (value) => {
-        const paddingValue = value;
-        this.setPadding(paddingValue, SComponentPaddingDirection.Top);
-        this.setPadding(paddingValue, SComponentPaddingDirection.Bottom);
-      },
-    });
+      const paddingstTopBottomInputG = new StlbNumberInput('PT');
+      paddingstTopBottomInputG.container.position.x = this._propertyEditorCurrentX;
+      paddingstTopBottomInputG.container.position.y = this._propertyEditorCurrentY;
+      paddingstTopBottomInputG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
+      paddingstTopBottomInputG.onChanged.subscribe({
+        next: (value) => {
+          const paddingValue = value;
+          this.setPadding(paddingValue, SComponentPaddingDirection.Top);
+          this.setPadding(paddingValue, SComponentPaddingDirection.Bottom);
+        },
+      });
 
-    this._propertyEditorCurrentX = this._propertyEditorPaddings;
-    this._propertyEditorCurrentY += paddingstLeftRightInputG.height * 2 + this._propertyEditorPaddings;
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += paddingstLeftRightInputG.height * 2 + this._propertyEditorPaddings;
 
-    propGrapchics.push(paddingstLeftRightInputG.render());
-    propGrapchics.push(paddingstTopBottomInputG.render());
+      propGrapchics.push(paddingstLeftRightInputG.render());
+      propGrapchics.push(paddingstTopBottomInputG.render());
+
+      this._inputPaddingLeftRightG = paddingstLeftRightInputG;
+      this._inputPaddingRightBottomG = paddingstTopBottomInputG;
+    } else {
+      this._inputPaddingLeftRightG.inputText = this._paddings[SComponentPaddingDirection.Left].value.toFixed(0);
+      this._inputPaddingRightBottomG.inputText = this._paddings[SComponentPaddingDirection.Top].value.toFixed(0);
+
+      propGrapchics.push(this._inputPaddingLeftRightG.container);
+      propGrapchics.push(this._inputPaddingRightBottomG.container);
+
+      this._propertyEditorCurrentX = this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += this._inputPaddingLeftRightG.height * 2 + this._propertyEditorPaddings;
+    }
 
     // GComponent Constraints
     const constraintsG = new GComponentPositionConstraint(
@@ -465,33 +524,43 @@ export abstract class StlbBaseGComponent {
     });
   }
 
+  private readonly _customPropInputs: { [prtopName: string]: StlbBaseinput<any> } = {};
+
   drawCustomProperty() {
     this.getProperties([SComponentPropertyAttribute.Custom]).forEach((prop) => {
-      let xInput: StlbBaseinput<any>;
-      if (prop.type === SComponentPropertyType.String) {
-        xInput = new StlbTextInput(prop.name);
-        xInput.inputText = <string>prop.value;
-      } else if (prop.type === SComponentPropertyType.Number) {
-        xInput = new StlbNumberInput(prop.name);
-        xInput.inputText = (<number>prop.value).toFixed(0);
-      } else if (prop.type === SComponentPropertyType.Boolean) {
-        xInput = new StlbBooleanInput(prop.name);
-        xInput.inputText = <string>prop.value;
-      } else if (prop.type === SComponentPropertyType.Color) {
-        xInput = new StlbColorPickerInput(prop.name);
-        xInput.inputText = <string>prop.value;
-      } else {
-        throw new Error(`Custom property is not support ${prop.type}`);
-      }
+      let propinput = this._customPropInputs[prop.name];
+      if (!propinput) {
+        let xInput: StlbBaseinput<any>;
+        if (prop.type === SComponentPropertyType.String) {
+          xInput = new StlbTextInput(prop.name);
+          xInput.inputText = <string>prop.value;
+        } else if (prop.type === SComponentPropertyType.Number) {
+          xInput = new StlbNumberInput(prop.name);
+          xInput.inputText = (<number>prop.value).toFixed(0);
+        } else if (prop.type === SComponentPropertyType.Boolean) {
+          xInput = new StlbBooleanInput(prop.name);
+          xInput.inputText = <string>prop.value;
+        } else if (prop.type === SComponentPropertyType.Color) {
+          xInput = new StlbColorPickerInput(prop.name);
+          xInput.inputText = <string>prop.value;
+        } else {
+          throw new Error(`Custom property is not support ${prop.type}`);
+        }
 
-      // const xInput = new StlbTextInput(prop.name);
-      xInput.container.position.x = this._propertyEditorCurrentX;
-      xInput.container.position.y = this._propertyEditorCurrentY;
+        propinput = xInput;
+        propinput.render();
+        this._customPropInputs[prop.name] = propinput;
+      } else {
+        propinput.inputText = <string>prop.value;
+      }
+      
+      propinput.container.position.x = this._propertyEditorCurrentX;
+      propinput.container.position.y = this._propertyEditorCurrentY;
 
       this._propertyEditorCurrentX = this._propertyEditorPaddings;
-      this._propertyEditorCurrentY += xInput.height + this._propertyEditorPaddings;
+      this._propertyEditorCurrentY += propinput.height + this._propertyEditorPaddings;
 
-      this.propertyEditorContainer.addChild(xInput.render());
+      this.propertyEditorContainer.addChild(propinput.container);
     });
   }
 

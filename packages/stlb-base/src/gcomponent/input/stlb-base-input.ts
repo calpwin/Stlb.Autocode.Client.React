@@ -14,8 +14,7 @@ export abstract class StlbBaseinput<Type extends string | number | boolean> {
   public set inputText(v: string) {
     this._inputValue = v;
     this._inputValueString = v.toString();
-    // this._inputValueG.value = this._inputValueString;
-    // this._inputValueTextG.text = this._inputValueString;
+    this._inputValueG.value = this._inputValueString;    
   }
 
   public get value(): Type {
